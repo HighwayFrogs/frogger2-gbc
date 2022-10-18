@@ -1,0 +1,95 @@
+	thisbank	$3f
+	org	$4000
+	nop
+	thisbank	$3e
+	org	$4000
+
+monobank	equ	$3e
+hititlebank	equ	$3e
+hititlepal	includeraw	grfx\titlepal.raw
+hititlemap	includeraw	grfx\titlemap.raw
+		includeraw	grfx\titleatr.raw
+		includeraw	grfx\titletil.raw
+monocode
+l0
+	ld	a,($ff40)
+	and	a
+	jr	z,l1
+	ld	a,($ff44)
+	cp	$90
+	jr	nc,l0
+	xor	a
+	ld	($ff40),a
+l1
+	ld	hl,0+bwmessage+$40	;skip palatte
+	ld	de,$9800
+	ld	bc,$400
+	call	move
+	ld	de,$401
+	add	hl,de
+	ld	de,$9000
+	ld	bc,$800
+	call	move
+	ld	a,$e4
+	ld	($ff47),a
+	ld	a,$81
+	ld	($ff40),a
+inf	jp	inf
+	
+
+move
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec bc
+	ld	a,b
+	or	c
+	jr	nz,move
+	ret
+
+bwmessage	includeraw	bw.pmf
+
+	thisbank	$3d
+	org	$4000
+enterbank	equ	$3d
+enterpal		includeraw	grfx\enterpal.raw
+entermap		includeraw	grfx\entermap.raw
+		includeraw	grfx\enteratr.raw
+		includeraw	grfx\entertil.raw
+
+
+
+	thisbank	$3c
+	org	$4000
+erasebank	equ	$3c
+erasepal		includeraw	grfx\erasepal.raw
+erasemap		includeraw	grfx\erasemap.raw
+			includeraw	grfx\eraseatr.raw
+			includeraw	grfx\erasetil.raw
+
+
+
+	thisbank	$3a
+	org	$4000
+higoverbank	equ	$3a
+higoverpal	includeraw	grfx\goverpal.raw
+higovermap	includeraw	grfx\govermap.raw
+		includeraw	grfx\goveratr.raw
+		includeraw	grfx\govertil.raw
+
+
+
+
+	thisbank	$39
+	org	$4000
+
+timebank	equ	$39
+timepal		includeraw	grfx\timepal.raw
+timemap		includeraw	grfx\timemap.raw
+		includeraw	grfx\timeatr.raw
+		includeraw	grfx\timetil.raw
+
+
+	dumpsym logo
+
+

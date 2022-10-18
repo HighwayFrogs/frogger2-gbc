@@ -1,0 +1,6 @@
+<HTML><FONT  SIZE=3 PTSIZE=10>Music cues:<BR>
+<BR>
+1 - Background during gameplay.<BR>
+2 - Stinger for reaching the exit.<BR>
+3 - Stinger for collecting all coins.<BR>
+4 - Rescue baby frog -- completed game.</HTML>

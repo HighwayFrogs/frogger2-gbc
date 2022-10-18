@@ -1,0 +1,2802 @@
+levtab
+	dw	w0l0data	;pond
+	dw	w0l1data	;pond
+	dw	w0l2data	;pond
+	dw	w0l3data	;pond
+	dw	w0l4data	;pond
+	dw	w0l5data	;pond
+	dw	w1l0data	;treasure
+
+	dw	w2l5data	;boulders
+	dw	w2l0data	;boulders
+	dw	w2l1data	;boulders
+	dw	w2l2data	;boulders
+	dw	w2l4data	;boulders
+	dw	w2l3data	;boulders
+	dw	w1l1data	;treasure
+
+	dw	w3l0data	;ice caverns
+	dw	w3l1data	;ice caverns
+	dw	w3l2data	;ice caverns
+	dw	w3l3data	;ice caverns
+	dw	w3l4data	;ice caverns
+	dw	w3l5data	;ice caverns
+	dw	w1l3data	;treasure
+
+	dw	w5l0data
+	dw	w5l1data
+	dw	w5l2data
+	dw	w5l3data
+	dw	w5l4data
+	dw	w5l5data
+	dw	w1l2data	;treasure
+
+	dw	w4l0data	;tram cars
+	dw	w4l1data	;tram cars
+	dw	w4l2data	;tram cars
+	dw	w1l4data	;boss
+
+;;;;;;;
+
+w0l0data
+	db	0	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w0bank	;bank for font and map info
+	dw	0+w0font
+	dw	0+w0l0map
+	dw	0+w0pal
+	dw	w0l0sprites
+;lane speed
+	db 	0,0,0,0,0
+	db	-4,4,-2,3,-3
+	db	0
+	db	-2,10,-3
+	db	0,0,0
+	db	5,-3,2
+	db	0,0,0,0
+	db	-2,4,-2,2,-2
+	db	0,0,0
+w0l1data
+	db	0	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w0bank
+	dw	0+w0font
+	dw	0+w0l1map
+	dw	0+w0pal
+	dw	w0l1sprites
+;lane speed
+	db	0,0,0,0
+	db	-3,4,-4,5,-2,-3,4,-4
+	db	4,-2,-4
+	db	0,0
+	db	3,-5,-4,3,-2,4,-4,-3
+	db	4,-3,4,-3
+	db	0,0,0
+
+
+w0l2data
+	db	0	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w0bank	;bank for font and map info
+	dw	0+w0font
+	dw	0+w0l2map
+	dw	0+w0pal
+	dw	w0l2sprites
+;lane speed
+	db	0,0,0
+	db	3,-5
+	db	0,0
+	db	5,-6,7
+	db	0,0,0,0
+	db	-7,1,-4
+	db	0,0
+	db	-6,9,-12
+	db	0,0
+	db	7,-4,6,5,-3
+	db	0,0,0
+w0l3data
+	db	0	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w0bank
+	dw	0+w0font
+	dw	0+w0l3map
+	dw	0+w0pal
+	dw	w0l3sprites
+;lane speed
+	db 	0,0,0,0,0
+	db	-4,4,-5,6,0
+	db	0
+	db	-2,3,0	;-12
+	db	0,0,0
+	db	4,-3,5
+	db	0,0,0,0
+	db	-4,5,-2,3,0
+	db	0,0,0
+w0l4data
+	db	0	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w0bank	;bank for font and map info
+	dw	0+w0font
+	dw	0+w0l4map
+	dw	0+w0pal
+	dw	w0l4sprites
+;lane speed
+	db 	0,0,0,0,0
+	db	-4,4,-2,3,-3
+	db	0
+	db	-2,10,-4
+	db	0,0,0
+	db	-4,3,-2
+	db	0,-3,0,0
+	db	-2,2,-2,2,-3
+	db	0,0,0
+w0l5data
+	db	0	;world
+	db	$70	;starting x
+	dw	$1d0	;startingy
+	db	w0bank
+	dw	0+w0font
+	dw	0+w0l5map
+	dw	0+w0pal
+	dw	w0l5sprites
+;lane speed
+	db	0,0,0
+	db	-5,3,-4,5,-6,-4
+	db	0,0
+	db	2,-4,3,-4,3
+	db	0
+	db	-6,5,-3
+	db	0,0
+	db	4,-3,3
+	db	0
+	db	-5,3,-4
+	db	0,0,0
+;;;;;;;;;
+w1l0data
+	db	1	;world
+	db	$80	;starting x
+	dw	$1e0	;startingy
+	db	w1bank
+	dw	0+w1font
+	dw	0+w1l0map
+	dw	0+w1pal
+	dw	w1l0sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,-4,2
+	db	0,0,0,0,0,0,0,0
+w1l1data
+	db	1	;world
+	db	$60	;starting x
+	dw	$1e0	;startingy
+	db	w1bank
+	dw	0+w1font
+	dw	0+w1l1map
+	dw	0+w1pal
+	dw	w1l1sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,-5,4,0,0,3,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,-3,0,0,0,0,0,0
+w1l2data
+	db	1	;world
+	db	$70	;starting x
+	dw	$1e0	;startingy
+	db	w1bank
+	dw	0+w1font
+	dw	0+w1l2map
+	dw	0+w1pal
+	dw	w1l2sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,-2,3
+	db	0,0,0,0,0,0,0,3
+	db	0,-2,0,0,0,0,0,0
+w1l3data
+	db	1	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w1bank
+	dw	0+w1font
+	dw	0+w1l3map
+	dw	0+w1pal
+	dw	w1l3sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,3,0,0,0,0,0,0
+w1l4data
+	db	1	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w1bank
+	dw	0+w1font
+	dw	0+w1l4map
+	dw	0+w1pal
+	dw	w1l4sprites
+;lane speed
+	db	0,0,0,0,0,0,0,-4
+	db	-3,-2,0,0,0,0,0,0
+	db	0,0,0,0,2,0,0,-2
+	db	0,0,0,0,0,0,0,0
+
+;;;;;; WORLD 2
+
+w2l0data
+	db	2	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w2bank
+	dw	0+w2font
+	dw	0+w2l0map
+	dw	0+w2pal
+	dw	w2l0sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,2,2,3,3,-4,-4
+	db	5,5,-5,-5,0,0,0,0
+w2l1data
+	db	2	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w2bank
+	dw	0+w2font
+	dw	0+w2l1map
+	dw	0+w2pal
+	dw	w2l1sprites
+;lane speed
+	db	0,0,0,0,4,4,2,2
+	db	-3,-3,-2,-2,3,3,-4,-4
+	db	6,6,3,3,-3,-3,2,2
+	db	-2,-2,3,3,0,0,0,0
+w2l2data
+	db	2	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w2bank
+	dw	0+w2font
+	dw	0+w2l2map
+	dw	0+w2pal
+	dw	w2l2sprites
+;lane speed
+	db	0,0,0,-1,-1,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,-3,-3
+	db	2,2,-4,-4,0,0,0,0
+w2l3data
+	db	2	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w2bank
+	dw	0+w2font
+	dw	0+w2l3map
+	dw	0+w2pal
+	dw	w2l3sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+w2l4data
+	db	2	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w2bank
+	dw	0+w2font
+	dw	0+w2l4map
+	dw	0+w2pal
+	dw	w2l4sprites
+;lane speed
+	db	0,0,0,0,-2,-2,2,2
+	db	-3,-3,1,1,4,-2,3,-3
+	db	-3,-5,-5,2,3,4,-5,-5
+	db	-4,-4,-3,-3,0,0,0,0
+w2l5data
+	db	2	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w2bank
+	dw	0+w2font
+	dw	0+w2l5map
+	dw	0+w2pal
+	dw	w2l5sprites
+;lane speed
+	db	0,0,0,0,-4,3,-3,0
+	db	-1,-1,2,2,-3,-3,1,1
+	db	-5,0,4,-4,6,0,-1,-1
+	db	2,2,-2,-2,0,0,0,0
+
+;;;; world 3
+
+w3l0data
+	db	3	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w3bank
+	dw	0+w3font
+	dw	0+w3l0map
+	dw	0+w3pal
+	dw	w3l0sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,-5
+	db	4,-3,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+w3l1data
+	db	3	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w3bank
+	dw	0+w3font
+	dw	0+w3l1map
+	dw	0+w3pal
+	dw	w3l1sprites
+;lane speed
+	db	0,0,0,0,0,0,0,-4
+	db	5,0,0,0,0,0,0,0
+	db	4,3,-4,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+w3l2data
+	db	3	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w3bank
+	dw	0+w3font
+	dw	0+w3l2map
+	dw	0+w3pal
+	dw	w3l2sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+w3l3data
+	db	3	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w3bank
+	dw	0+w3font
+	dw	0+w3l3map
+	dw	0+w3pal
+	dw	w3l3sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,-2,2,-3,0
+	db	0,3,-2,0,0,0,0,0
+w3l4data
+	db	3	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w3bank
+	dw	0+w3font
+	dw	0+w3l4map
+	dw	0+w3pal
+	dw	w3l4sprites
+;lane speed
+	db	0,0,0,0,0,0,0,0
+	db	0,-3,2,0,0,4,-5,0
+	db	0,0,0,0,0,3,4,0
+	db	0,0,0,0,0,0,0,0
+
+w3l5data
+	db	3	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w3bank
+	dw	0+w3font
+	dw	0+w3l5map
+	dw	0+w3pal
+	dw	w3l5sprites
+;lane speed
+
+
+	db	0,0,0,-4,4,2,-5,5,-3
+	db	5,3,-4,2,-3,3,4,-5
+	db	0,0,-4,2,-2,-4,3
+;	db	2,0,0,-4,2,-2,-4,3
+	db	-3,5,-4,-3,4,0,0,0
+
+
+;;;;;
+
+w4l0data
+	db	4	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w4bank
+	dw	0+w4font
+	dw	0+w4l0map
+	dw	0+w4pal
+	dw	w4l0sprites
+;lane speed
+	db	0,0,0,0,0,0,0,-2
+	db	0,0,0,0,0,0,0,0
+	db	0,2,0,3,-2,2,0,0
+	db	0,0,0,-3,3,0,0,0
+w4l1data
+	db	4	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w4bank
+	dw	0+w4font
+	dw	0+w4l1map
+	dw	0+w4pal
+	dw	w4l1sprites
+;lane speed
+	db	0,0
+	db	0,0,0,0,0,0,0
+	db	2,0,2,-2,0,0
+	db	2,3,-2,0,0,-2,2
+	db	0,0,2,0,-2,0,2
+	db	0,0
+w4l2data
+	db	4	;world
+	db	$60	;starting x
+	dw	$1d0	;startingy
+	db	w4bank
+	dw	0+w4font
+	dw	0+w4l2map
+	dw	0+w4pal
+	dw	w4l2sprites
+;lane speed
+	db	0,0
+	db	0,0,0,0
+	db	2,3,4,-4,-3,-2
+	db	0,2,0,0,0,0,0,0
+	db	-2,0,0,2,0,-2,0,0
+	db	2,0
+	db	0,0
+
+w5l0data
+	db	5	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w5bank	;bank for font and map info
+	dw	0+w5font
+	dw	0+w5l0map
+	dw	0+w5pal
+	dw	w5l0sprites
+;lane speed
+	db 	0,0,0,0
+	db	1,1,0,-1,0,-2
+	db	0,0,0
+	db	0,0,0
+	db	0
+	db	3,-2,-4,2
+	db	0,0,0
+	db	-1,-1,0,1,-2
+	db	0,0,0
+w5l1data
+	db	5	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w5bank	;bank for font and map info
+	dw	0+w5font
+	dw	0+w5l1map
+	dw	0+w5pal
+	dw	w5l1sprites
+;lane speed
+	db	0,0
+	db	0,0,0,0,-2,2,-1,1
+	db	0,1,1,0,-2,-2,1,1
+	db	0,1,1,0,-2,0,1,2,0,-1,0,0
+	db	0,0
+
+w5l2data
+	db	5	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w5bank	;bank for font and map info
+	dw	0+w5font
+	dw	0+w5l2map
+	dw	0+w5pal
+	dw	w5l2sprites
+;lane speed
+	db	0,0
+	db	0,0,0,1,1,0,2,2
+	db	0,0,0,0,0,0
+	db	-3,1,3,-4,2,0
+	db	1,0,-2,0,4,-3,0,0
+	db	0,0
+w5l3data
+	db	5	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w5bank	;bank for font and map info
+	dw	0+w5font
+	dw	0+w5l3map
+	dw	0+w5pal
+	dw	w5l3sprites
+;lane speed
+	db	0,0
+	db	0,0,3,0,-4,3,0,4,2,-3,-2,2
+	db	0,0,2,-2,3,-3,0,0,0
+	db	4,-3,0,0,0,0,0
+	db	0,0
+w5l4data
+	db	5	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w5bank	;bank for font and map info
+	dw	0+w5font
+	dw	0+w5l4map
+	dw	0+w5pal
+	dw	w5l4sprites
+;lane speed
+	db	0,0
+	db	0,0,1,2,3,0
+	db	-4,2,-3,0,0,0,0,0,0
+	db	3,-2,-4,2,0,1,1
+	db	0,0,2,2,0
+	db	0,0
+w5l5data
+	db	5	;world
+	db	$80	;starting x
+	dw	$1d0	;startingy
+	db	w5bank	;bank for font and map info
+	dw	0+w5font
+	dw	0+w5l5map
+	dw	0+w5pal
+	dw	w5l5sprites
+;lane speed
+	db	0,0
+	db	0,-1,1,0,0,0,0
+	db	1,-3,3,-1,4,-2
+	db	1,-4,0,1,-3,3,4
+	db	0,-1,-1,0,2,1,0,0
+	db	0,0
+w6l0data
+
+
+
+
+
+;;; vector tables for the world 2 game
+
+w2gametab	
+	dw	w2l5game
+	dw	w2l0game
+	dw	w2l1game
+	dw	w2l2game
+	dw	w2l4game
+	dw	w2l3game
+
+PUP	equ	1
+PRIGHT	equ	2
+PDOWN	equ	3
+PLEFT	equ	4    
+
+
+w2l0game
+	db	PUP
+	db	PUP	
+	db	PRIGHT
+	db	PRIGHT
+	db	0
+;	db	PUP
+	db	PLEFT
+	db	PLEFT
+	db	PUP
+	db	PUP
+	db	0
+;	db	PRIGHT	;PUP
+	db	PUP
+	db	PRIGHT
+	db	PUP
+	db	PRIGHT
+	db	PRIGHT
+	db	0
+;	db	PLEFT
+	db	PDOWN
+	db	PRIGHT
+	db	PRIGHT
+	db	PUP
+	db	PUP
+	db	PUP
+	db	0
+;	db	PLEFT
+	db	PLEFT
+	db	PUP
+	db	PLEFT
+	db	PUP
+	db	PUP
+	db	PRIGHT
+	db	PUP
+	db	$ff
+w2l1game
+	db	$ff
+
+w2l2game
+	db	pleft,pleft,pleft,pup,pup,0
+	db	pup,pright,pright,pright,pright,pright,pup,0
+	db	pup,pleft,pleft,pup,pup,pright,0
+	db	pright,pup,pup,pup,pright,0
+;	db	pup,pright,pright,pdown,pright,pright,pup,pup,pup
+	db	pdown,pdown,pright,pright,pup,pup,pup
+	db	$ff
+	
+w2l3game
+	db	pup,pup,pright,pright,pright,pdown,pdown,pdown,0
+	db	pright,pup,pright,pup,0,pup,pleft,pleft,pleft,0
+	db	pleft,pleft,pleft,pdown,pleft,pdown,pdown,0
+	db	pdown,pdown,pleft,pleft,pup,0,pleft,pup,pup,pright,0
+
+;	db	pright,pup,pright,pup,0,pup,pleft,pup,pleft,0
+;	db	pleft,pleft,pleft,pleft,pdown,pleft,pdown,pdown,0
+;	db	pdown,pdown,pleft,pleft,0,pleft,pup,pup,pright,0
+	db	pup,pright,pup,pup,0,pup,pleft,pleft,pup,0
+	db	pup,pup,pup,pup,0,pright,pright,pdown,pright,0
+	db	pright,pup,pup,pup,pup,pleft,pleft,pleft,0
+	db	pup,pright,pright,pright,0,pup,pup,pleft,pup,0
+	db	pright,pright,pup,pright,0,pup,pright,pup,pup,0
+	db	pup,pup,pleft,pleft,pleft,pleft,pdown,pdown,0
+	db	$ff
+
+;	db	pright,pright,pright,pup,pup,pup,pleft,pup,0
+;	db	pleft,pleft,pup,pup,pright,pright,pup,pup,0
+;	db	pup,pup,pup,pup,pleft,pleft,pleft,pleft,0
+;	db	pup,pup,pup,pright,pright,pright,pup,pup,0
+;	db	pdown,pdown,pleft,pleft,pup,pup,pup
+;	db	$ff
+
+w2l4game
+;	db	pleft,pleft,pleft,pdown,0
+;	db	pleft,pup,pup,pright,0
+;	db	pup,pup,pup,pup,pright,pright,pright,pright,0
+;	db	pdown,pright,pright,pup,pright,0
+;	db	pleft,pleft,pleft,pleft,pleft,pdown,pdown,0
+;	db	pright,pright,pup,pright,pup,pright,pup,0
+;	db	pleft,pup,0
+	db	$ff
+w2l5game
+;	db	pright,pright,pright,pright,pup,pright,pup,0
+;	db	pdown,pdown,pleft,pleft,pleft,pup,0
+;	db	pleft,pup,pleft,pup,pup,pright,pup,0
+;	db	pup,pleft,pup,pup,pright,pright,pup,0
+;	db	pup,pup,pright,pright,pup,0
+;	db	pup,pup,pleft,pleft,pleft,pup,pup,0
+;	db	pleft,pleft,pdown,pleft,pleft,pup
+	db	$ff
+
+romdatastart		;common saved data used by all players
+recordholders1	
+	db	"SKIPPY  "
+	db	"HOPPER  "
+	db	"TADPOLE "
+	db	"CROAKEY "
+	db	"GREENGUY"
+	db	"POLLIWOG"
+	db	"LEGS    "	
+	db	"KERMIT  "	
+	db	"FLYGUY  "
+	db	"FROGGY  "
+	db	"MRKTWAIN"
+	db	"BLINKY  "	
+	db	"RIBBIT  "
+	db	"PRINCE  "	
+	db	"AMPHIBIA"
+	db	"JUMPY   "
+	db	"LEAPFROG"
+	db	"TREEFROG"
+	db	"TAD     "
+	db	"FROGMAN "
+	db	"WEBFOOT "
+	db	"HOPTOAD "
+	db	"RANIDAE "
+	db	"LAKEGUY "
+	db	"BARUMP  "
+	db	"SPRINGER"
+	db	"HOPKINS "
+	db	"KICKER  "	
+	db	"CROAKETT"
+	db	"SPLASH  "	
+	db	"TWANGER "
+	db	"TOP FROG"
+recordtimes1
+	db	0,3,21,0
+	db	0,9,22,0
+	db	0,1,35,0
+	db	0,4,19,0
+	db	0,7,20,0
+	db	0,2,43,0
+	db	0,4,02,1
+
+	db	0,2,22,0
+	db	0,1,28,0
+	db	0,9,16,0
+	db	0,3,32,0
+	db	0,8,21,0
+	db	0,9,43,0
+	db	0,4,04,1
+
+	db	0,2,45,0
+	db	0,1,36,0
+	db	0,9,35,0
+	db	0,6,37,0
+	db	0,4,48,0
+	db	0,3,54,0
+	db	0,1,48,1
+
+	db	0,6,49,0
+	db	0,9,40,0
+	db	0,3,47,0
+	db	0,2,50,0
+	db	0,4,39,0
+	db	0,2,41,0
+	db	0,4,43,1
+
+	db	0,3,35,0
+	db	0,6,38,0
+	db	0,7,51,0
+	db	0,2,20,1
+				;player-specific ram data
+romplayer
+;player1stats
+;	db	"PLAYER 1"	
+	db	"        "
+	db	0,0,0,0,0,0,0,0		;stats
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0		;other data (level, score, etc.)
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+;player2stats
+;	db	"PLAYER 2"
+	db	"        "
+	db	0,0,0,0,0,0,0,0		;stats
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+;player3stats
+;	db	"PLAYER 3"
+	db	"        "
+	db	0,0,0,0,0,0,0,0		;stats
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+romdataend
+
+guestdata
+	db	"GUEST   "
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0
+
+levtexttab	dw	lt00,lt01,lt02,lt03,lt04,lt05,lt10
+		dw	lt20,lt21,lt22,lt23,lt24,lt25,lt11
+		dw	lt30,lt31,lt32,lt33,lt34,lt35,lt12
+		dw	lt50,lt51,lt52,lt53,lt54,lt55,lt13
+		dw	lt40,lt41,lt42,lt14
+
+
+;			 0123456789abcded0123
+lt00
+		db	" FIVE LITTLE FROGS",$d
+		db	"  WANDERED ACROSS",$d
+		db	"  THE POND. YOU'D",$d
+		db	"  BETTER GO LOOK",$d
+		db	"     FOR THEM.",$d
+		db	0
+
+lt01
+		db	"THE GUY WHO GAVE ME",$d
+		db	"DIRECTIONS SAID I'D",$d
+		db	"COME TO A DEAD END.",$d
+		db	"I WONDER IF HE MEANT",$d
+		db	"  ME OR THE ROAD?"
+		db	0
+lt02
+		db	" WATCH OUT FOR THE",$d
+		db	"  WALL OF 'DOZERS.",0
+
+;			 0123456789abcded0123
+lt03
+		db	"    THERE'S BEEN",$d
+		db	"    AN OIL SPILL.",$d  
+		db	"   WHOSE SLIDE ARE",$d
+		db	"       YOU ON?"
+		db	0
+
+lt04
+		db	"      OH NO!",$d
+		db	" SOMEONE MUST HAVE",$d
+		db	"A FLAT TIRE. I HEAR",$d
+		db	"  LOTS OF HISSING.",$d
+		db	0
+
+lt05
+		db	"  HOW COME ALL THE",$d
+		db	"  OTHER FROGS KNOW",$d
+		db	"     HOW TO SWIM?"
+		db	0
+
+lt10
+		db	"   WELCOME TO THE",$d
+		db	"   TREASURE ROOM.",$d
+		db	"   CHECK OUT ALL ",$d
+		db	"    THE DIAMONDS.",$d
+
+		db	0
+lt11
+		db	" GUESS IT'S MY TURN",$d
+		db	"    AT BAT AGAIN.",0
+
+;			 0123456789abcded0123
+
+lt12
+		db	"  YIKES!  ANOTHER",$d
+		db	"  TREASURE ROOM. I",$d
+		db	"  WONDER IF ANY OF",$d
+		db	" THESE SPIDERS HAS",$d
+		db	"    A WEB SITE?",0  
+lt13
+	db	"   I'LL TREASURE",$d
+	db	"   THESE MOMENTS.",0
+lt14
+	db	"  WOW. YOU MADE IT",$d
+	db	"  THIS FAR. THAT'S",$d 
+	db	"     FANTASTIC.",$d
+	db	0
+
+lt20
+	db	"  THIS PLACE LOOKS",$d
+	db	"  DANGEROUS. I HEAR",$d
+	db	"RUMBLING -- AND IT'S",$d
+	db	"    NOT MY STOMACH.",0
+lt21
+	db	"  SOMETIMES I FEEL",$d
+	db	"      LIKE I'M",$d
+	db	"   WALKING ON AIR.",0
+lt22
+	db	"  WANT SOME ADVICE?",$d
+	db	"     NO STOPPIN',",$d
+	db	"    KEEP HOPPIN'.",0
+lt23
+	db	" THE BOLDER I GET,",$d
+	db	" THE MORE BOULDERS",$d
+	db	"       I GET.",0	
+lt24
+	db	"    DO YOU LIKE",$d 
+	db	"     THE MUSIC?",$d
+	db	" IT'S CROC AND ROLL.",$0
+lt25
+	db	" HEY, I DON'T HEAR",$d
+	db	" ANY MORE RUMBLING.",$d
+	db	"   THAT'S GREAT...",$d
+	db	"      I THINK...",$0
+	db	0
+
+		;0123456789abcded0123
+lt30
+	db	"  THIS IS AN ICE",$d
+	db	"  PLACE TO VISIT,",$d
+	db	"  BUT THERE'S SNOW",$d
+	db	"  PLACE LIKE HOME.",0
+lt31
+	db	"  THIS PLACE GIVES",$d
+	db	"    ME THE CHILLS.",$d 
+	db	" AND THE LAST THING",$d
+	db	"   A FROG NEEDS IS",$d 
+	db	"    GOOSE BUMPS.",0
+
+lt32
+	db	"   LIFE HAS IT'S",$d
+	db	"   UPS AND DOWNS.",$d
+	db	"    SO DOES ICE.",0
+
+		;0123456789abcded0123
+
+lt33
+	db	"  ODDLY ENOUGH, I",$d
+	db	" DON'T FEEL SO HOT.",$d
+	db	"    I THINK I'M",$d
+	db	"  CATCHING A COLD."
+	db	0
+lt34
+	db	"I'M SO COLD I CAN'T",$d
+	db	"  FEEL MY THUMBS.",$d
+	db	" WAIT, I FORGOT...",$d
+	db	" FROGS DON'T HAVE",$d
+	db	"   ANY THUMBS.",0
+
+
+	db	0
+lt35
+	db	"     CHILL OUT.",0
+lt40
+	db	" COOL, AN OLD MINE.",$d
+	db	"  I COULD FALL FOR",$d
+	db	" A PLACE LIKE THIS.",0
+lt41
+	db	"     MINE! MINE!",$d
+	db	"   IT'S ALL MINE!",0 
+lt42
+	db	"  TIME TO BOLDLY",$d
+	db	"CROAK WHERE NO FROG",$d
+	db	" HAS CROAKED BEFORE.",$d
+	db	0
+
+;		 0123456789abcded0123
+lt50
+	db	"  THIS LOOKS LIKE",$d
+	db	"  A PLACE TO FIND",$d
+	db	" FLAME AND FORTUNE.",0	
+lt51
+	db	"  A FROG WHO LEAPS",$d
+	db	"    WITHOUT FIRST",$d
+	db	"       LOOKING,",$d
+	db	"  ENDS HIS DAYS IN",$d
+	db	"   LAVA, COOKING.",$0
+lt52
+	db	"     IF I DON'T",$d
+	db	"    GET THROUGH,",$d
+	db	"    I THINK I'LL",$d
+	db	"     GET FIRED.",0
+	db	0
+lt53
+	db	" I'LL HAVE TO CROSS",$d
+	db	"  THIS LAVA RIVER",$d
+	db	"   ASBESTOS I CAN.",0
+lt54
+	db	"  I'LL HAVE SOME",$d
+	db	"  RIBBITING TALES",$d
+	db	" TO TELL IF I EVER",$d
+	db	"   GET BACK HOME.",0
+
+lt55				  
+	db	"OH NO! NOW IT LOOKS",$d
+	db	"LIKE MY GOOSE BUMPS",$d
+	db	"  WILL GET COOKED.",0
+
+tiptab
+	dw	tp00,tp01,tp02,tp03
+	dw	tp04,tp05,tp06,tp07
+	dw	tp08,tp09,tp0a,tp0b
+	dw	tp0c,tp0d,tp0e,tp0f
+	dw	tp10,tp11,tp12,tp13
+	dw	tp14,tp15,tp16,tp17
+	dw	tp18,tp19,tp1a,tp1b
+	dw	tp1c,tp1d,tp1e,tp1f
+
+
+tp00		;0123456789abcdef0123
+	db	"HI. I'M TADIUS.",$d,$d
+	db	"KEEP AN EYE OUT",$d
+	db	"FOR ME DURING",$d
+	db	"YOUR ADVENTURE.",$d  
+	db	"I'LL GIVE YOU A",$d
+	db	"TIP WHENEVER I CAN.",$d,$d
+	db	"I THINK YOU KNOW",$d 
+	db	"WHAT TO DO HERE --",$d
+	db	"AVOID CARS, RIDE",$d
+	db	"THE LOGS, AND DON'T",$d
+	db	"FALL IN THE WATER.",$d,$d
+	db	"GOOD LUCK."
+	db	$0
+tp01
+	db	"ROUGH ROAD.",$d
+	db	"GLAD YOU MADE IT.",$d,$d
+	db	"AS YOU CROSS THE",$d
+	db	"REST OF THE POND,",$d 
+	db	"YOU'LL NOTICE THAT",$d
+	db	"SOME TURTLES SINK",$d
+	db	"BENEATH THE WATER.",$d
+	db	"MAKE SURE YOU HOP",$d
+	db	"OFF BEFORE THEY",$d
+	db	"GO UNDER.",0
+
+tp02		;0123456789abcdef0123
+	db	"GOOD TO SEE YOU.",$d
+	db	"HERE'S A TIP:",$d,$d
+	db	"SNAKE'S HEAD",$d
+	db	"MAKES FROG DEAD.",$d
+	db	"SNAKE'S BACK",$d
+	db	"CAN'T ATTACK.",0
+
+tp03
+	db	"I HEARD A SNAKE",$d
+	db	"ONCE SCARED A MAN",$d
+	db	"SO MUCH THAT HE",$d
+	db	"DROPPED FOUR GEMS",$d
+	db	"IN THE TALL GRASS.",$d,$d
+	db	"BY THE WAY, DID YOU",$d
+	db	"FIND THE CHECKPOINT",$d
+	db	"IN THE WATER? IT'S",$d
+	db	"EASY TO SLIP UP",$d
+	db	"AROUND HERE SO YOU",$d
+	db	"MIGHT WANT TO PAY",$d
+	db	"IT A VISIT.",$0 
+
+tp04	  	;actually used for level 0 as a second tip
+
+	db	"WELL DONE.",$d,$d
+	db	"THAT BURROW TO THE",$d
+	db	"LEFT SHOULD LEAD",$d
+	db	"YOU WHERE YOU NEED",$d
+	db	"TO GO.",0  
+tp05
+	db	"THE POND IS A",$d
+	db	"LOT LIKE LIFE.",$d
+	db	"IT'S NOT ALWAYS",$d
+	db	"BEST TO JUMP AT THE",$d
+	db	"FIRST OPPORTUNITY",$d 
+	db	"THAT FLOATS BY.",$d,$d
+	db	"ON THE OTHER HAND,",$d
+	db	"IF YOU WAIT TOO",$d
+	db	"LONG, YOU'RE SUNK.",0
+	
+	
+tp06
+	db	"YOU CAN RIDE THE",$d
+	db	"MOVING BELT. BUT",$d
+	db	"WATCH OUT FOR THOSE",$d
+	db	"GLOWING CAULDRONS.",$d
+	db	"THEY LOOK RED HOT.",$d,$d
+	db	"TRY NOT TO FALL OFF",$d
+	db	"THE EDGE, EITHER.",$d,$d
+	db	"HMMMM. I DON'T SEE",$d
+	db	"ANY WAY TO GET OUT",$d
+	db	"OF HERE. DO YOU?",0
+tp07
+	db	"YOU CAN RIDE THE",$d
+	db	"GATOR'S BODY.",$d,$d
+	db	"JUST STAY AWAY",$d
+	db	"FROM THE SNOUT.",$0
+
+tp08			;used in w5l0
+	db	"I'M TADIUS'S TWIN",$d
+	db	"BROTHER, GORF. HE",$d
+	db	"FORGOT TO GIVE YOU",$d
+	db	"AN IMPORTANT TIP.",$d,$d
+	db	"A JUMP FROM A ",$d
+	db	"MOVING PLATFORM TO",$d
+	db	"A SMALL OPENING CAN",$d
+	db	"BE TRICKY. BUT IF",$d
+	db	"YOU PRESS THE KEYPAD",$d
+	db	"SLIGHTLY AHEAD OF",$d
+	db	"TIME AND HOLD IT,",$d
+	db	"YOU'LL MAKE THE",$d
+	db	"JUMP JUST RIGHT.",$d
+	db	0
+tp09
+;	db	"I KNOW YOU",$d
+;	db	"WANT TO DASH",$d
+;	db	"STRAIGHT NORTH.",$d
+;	db	"BUT WHEN THE TRACK",$d
+;	db	"IS DENSELY PACKED,",$d
+;	db	"A SMART FROG",$d
+;	db	"ZIGZAGS BACK",$d
+;	db	"AND FORTH."
+
+
+	db	"I KNOW YOU",$d
+	db	"WANT TO DASH",$d
+	db	"STRAIGHT NORTH.",$d,$d
+	db	"BUT WHEN",$d
+	db	"  THE TRACK",$d
+	db	"    IS DENSELY",$d 
+	db	"         PACKED,",$d
+	db	"          A SMART",$d 
+	db	"        FROG",$d;
+	db	"    ZIGZAGS",$d
+	db	" BACK",$d;
+	db	"    AND",$d 
+	db	"      FORTH.",$d
+	db	0
+
+
+tp0a
+	db	"YOU CAN LEAVE THE",$d
+	db	"INVISIBLE PATH",$d
+	db	"FOR A PLATFORM,",$d
+	db	"AND SAFELY RETURN.",$d,$d
+	db	"JUST REMEMBER, YOU",$d
+	db	"CAN ONLY JUMP ON",$d
+	db	"EACH SPOT ONCE.",$d,$d
+	db	"SO YOU CAN'T GO",$d
+	db	"BACK TO THE PLACE",$d
+	db	"YOU LEFT. YOU MUST",$d
+	db	"GO TO THE NEXT",$d
+	db	"STEP ON THE PATH.",$d
+	db	0
+	
+tp0b
+	db	"A GATOR'S NOT",$d
+	db	" A CROC.",$d,$d
+	db	"A FROG IS NOT",$d
+	db	" A TOAD.",$d,$d
+	db	"AND THERE IS NOT",$d
+	db	" ONE RESTING SPOT",$d
+	db	"DEPLOYED ALONG",$d
+	db	" THIS ROAD.",$d
+	db	0
+tp0c
+	db	$d,$d,$d
+	db	"    PATIENCE...",0
+tp0d
+	db	0
+tp0e
+	db	"ON SLIPPERY ICE,",$d
+	db	"IT'S BEST TO PLAN",$d
+	db	"AHEAD. BE SURE TO",$d
+	db	"SEARCH CAREFULLY",$d
+	db	"FOR THE PATH.",$d
+	db	"THERE IS ALWAYS",$d
+	db	"A SAFE ROUTE. YOU",$d
+	db	"CAN TEST YOUR LUCK",$d
+	db	"WITH A JUMP INTO THE",$d
+	db	"UNKNOWN, BUT YOU'LL",$d
+	db	"PROBABLY END UP IN",$d
+	db	"THE WATER. AND THE",$d
+	db	"WATER IS COLD",$d
+	db	"ENOUGH TO TURN YOU",$d
+	db	"INTO A FROGSICLE.",0 
+
+		 
+tp0f
+	db	"YOU'RE IN LUCK.",$d
+	db	"THOSE ARE PELCZARSKI",$d
+	db	"PENGUINS UP AHEAD.",$d
+	db	"THEY'RE FRIENDLY AND",$d
+	db	"HAPPY TO GIVE YOU",$d
+	db	"A RIDE.",$d
+	db	0
+tp10
+	db	"BE VERY PATIENT.",$d
+	db	"WATCH FOR FISH",$d
+	db	"CROSSING YOUR PATH",$d
+	db	"BEFORE YOU JUMP.",$d,$d
+	db	"AND DON'T JUST",$d
+	db	"WATCH WHERE YOU'RE",$d
+	db	"GOING. PAY SOME",$d
+	db	"ATTENTION TO WHERE",$d
+	db	"YOU'VE BEEN. THE",$d
+	db	"INFORMATION MIGHT",$d
+	db	"COME IN HANDY LATER.",0
+
+tp11
+	db	0
+tp12
+	db	0
+tp13
+	db	"I'M FREEZING.",$d
+	db	"ENOUGH OF THIS.",$d
+	db	"I'M GOING TO FIND",$d
+	db	"SOME PLACE THAT'S",$d
+	db	"NICE AND WARM.",$d,$d
+	db	"BY THE WAY, YOU CAN",$d
+	db	"JUMP BACK AND FORTH",$d
+	db	"BETWEEN RIDES THAT",$d
+	db	"ARE MOVING IN",$d
+	db	"OPPOSITE DIRECTIONS",$d
+	db	"WHILE YOU WAIT FOR A",$d 
+	db	"SAFE CHANCE TO",$d
+	db	"MOVE AHEAD.",0
+
+tp14
+	db	"YOU CAN'T ALWAYS GO",$d
+	db	"WITH THE FLOW.",$d,$d
+	db	"BUT WHEN YOU GO",$d
+	db	"AGAINST THE FLOW,",$d
+	db	"YOU'LL FIND IT'S",$d
+	db	"EASIER IF YOU DASH",$d
+	db	"JUST A BIT TOO FAR.",$d,$d
+	db	"YOU'LL KNOW WHAT",$d
+	db	"THIS MEANS WHEN",$d
+	db	"THE TIME COMES.",0
+
+	
+tp15
+	db	"BY ANY CHANCE,",$d
+	db	"DID YOU BRING SOME",$d
+	db	"ICE WITH YOU FROM",$d
+	db	"BACK THERE?",$d
+	db	"NO? NEVER MIND.",$d 
+	db	"I'LL STILL GIVE",$d 
+	db	"YOU A TIP:",$d,$d 
+	db	"IT'S OFTEN SAFER",$d
+	db	"TO BE THE CHASER",$d
+	db	"THAN THE CHASED.",$0
+
+
+tp16
+	db	"IF THE ROAD AHEAD",$d
+	db	"SEEMS IMPOSSIBLE,",$d
+	db	"YOU MIGHT NEED TO",$d
+	db	"FIND ANOTHER ROAD.",$d,$d
+	db	"IN OTHER WORDS --",$d
+	db	"IF AT FIRST YOU",$d
+	db	"DON'T SUCCEED, TRY",$d
+	db	"SOMETHING ELSE.",0 
+
+tp17
+	db	"I'VE TOLD YOU THIS",$d
+	db	"BEFORE, BUT IT'S",$d
+	db	"WORTH REPEATING.",$d
+	db	"REMEMBER, YOU CAN",$d
+	db	"GET IN BIG TROUBLE",$d
+	db	"IF YOU ALWAYS HOP",$d
+	db	"ON THE FIRST RIDE",$d
+	db	"THAT COMES ALONG.",0
+tp18
+	db	"BAD NEWS, MY",$d 
+	db	"WEB-FOOTED FRIEND.",$d
+	db	"I DON'T SEE AN",$d
+	db	"HOUR GLASS OR A",$d
+	db	"CHECKPOINT ANYWHERE",$d
+	db	"AROUND HERE.",$d,$d
+	db	"YOU'RE REALLY GOING",$d
+	db	"TO HAVE TO HOP",$d
+	db	"LIKE A BUNNY TO GET",$d
+	db	"ACROSS IN TIME.",0
+tp19
+	db	0
+tp1a
+	db	0
+
+tp1b
+	db	"DANGER LIES AHEAD.",$d
+	db	"WHEN YOU REACH THE",$d
+	db	"CHECKPOINT, TAKE A",$d
+	db	"MOMENT TO WATCH THE",$d
+	db	"SPIDER UP ABOVE.",$d
+	db	"LIKE ALL INSECTS,",$d
+	db	"HE'S A CREATURE OF",$d
+	db	"HABIT. LEARN HIS",$d
+	db	"PATH BEFORE YOU",$d
+	db	"CHOOSE YOURS.",$d
+	db	0
+
+tp1c		;0123456789abcdef0123
+	db	"THE MINE CARS ARE",$d
+	db	"SAFE TO RIDE. BUT",$0d
+	db	"WATCH OUT FOR THE",$d
+	db	"RAILS. THEY'LL FRY",$d
+	db	"YOUR LEGS FASTER",$d
+	db	"THAN A FANCY CHEF.",$d,$d
+	db	"A LITTLE TIP --",$d
+	db	"FEEL FREE TO HITCH",$d
+	db	"A LIFT FROM THE",$d
+	db	"BIRDS. HEDREN HAWKS",$d
+	db	"ARE ALWAYS NICE",$d
+	db	"TO FROGS.",0 
+tp1d
+	db	0
+tp1e
+	db	"YOU'RE NEARLY THERE.",$d
+	db	"GOOD THING, TOO.",$d
+	db	"I'M ALL OUT OF TIPS.",$d
+	db	0
+tp1f
+	db	0
+
+
+
+gatortab	;source, dest
+
+	dw	tail0,tailloc0
+	dw	head2,headloc1
+	dw	tail1,tailloc1
+	dw	head0,headloc0
+	dw	tail1,tailloc0
+	dw	head1,headloc0
+	dw	tail0,tailloc1
+	dw	head2,headloc1
+	dw	tail0,tailloc0
+	dw	head2,headloc1
+	dw	tail1,tailloc1
+	dw	head0,headloc0
+	dw	tail1,tailloc0
+	dw	head1,headloc0
+	dw	tail0,tailloc1
+	dw	head2,headloc1
+	dw	tail0,tailloc0
+	dw	head1,headloc1
+	dw	tail1,tailloc1
+	dw	head0,headloc0
+	dw	tail1,tailloc0
+	dw	head1,headloc0
+	dw	tail0,tailloc1
+	dw	head0,headloc1
+	dw	tail0,tailloc0
+	dw	head1,headloc1
+	dw	tail1,tailloc1
+	dw	head0,headloc0
+	dw	tail1,tailloc0
+	dw	head1,headloc0
+	dw	tail0,tailloc1
+	dw	head0,headloc1
+	dw	tail0,tailloc0
+	dw	head1,headloc1
+	dw	tail1,tailloc1
+	dw	head2,headloc0
+	dw	tail1,tailloc0
+	dw	head2,headloc0
+	dw	tail0,tailloc1
+	dw	head0,headloc1
+	dw	tail0,tailloc0
+	dw	head1,headloc1
+	dw	tail1,tailloc1
+	dw	head2,headloc0
+	dw	tail1,tailloc0
+	dw	head2,headloc0
+	dw	tail0,tailloc1
+	dw	head0,headloc1
+	dw	tail0,tailloc0
+	dw	head1,headloc1
+	dw	tail1,tailloc1
+	dw	head2,headloc0
+	dw	tail1,tailloc0
+	dw	head2,headloc0
+	dw	tail0,tailloc1
+	dw	head0,headloc1
+	dw	tail0,tailloc0
+	dw	head1,headloc1
+	dw	tail1,tailloc1
+	dw	head0,headloc0
+	dw	tail1,tailloc0
+	dw	head1,headloc0
+	dw	tail0,tailloc1
+	dw	head0,headloc1
+
+; for each sprite, give x, ylo, yhi, general purpose word, and init vector
+
+w0l0sprites
+
+	db	$10
+	dw	$1e0
+	db	0,0
+	dw	inittip
+
+	db	$70
+	dw	$100
+	db	0,0
+	dw	initcheck
+
+	db	$a0
+	dw	$20
+	db	4,0
+	dw	inittip
+
+
+
+	db	0	;end of data
+
+
+
+
+w0l1sprites
+	db	$70
+	dw	$110
+	db	0,0
+	dw	initcheck
+
+	db	$70
+	dw	$40
+	db	0,0
+	dw	inittip
+
+	db	0
+
+w0l2sprites
+
+	db	$10
+	dw	$70
+	dw	0
+	dw	initoneup
+
+	db	$10	;x
+	dw	$180	;y
+	db	1,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+	db	$20
+	dw	$050
+	db	$20,$60		;x limits
+	dw	initsnake1
+
+	db	$70
+	dw	$0c0
+	db	0,0
+	dw	initcheck
+
+	db	$20
+	dw	$d0
+	db	0,0
+	dw	inittip
+	
+
+	db	0
+
+w0l3sprites
+	db	$20
+	dw	$110
+	db	0,0
+	dw	inittip
+
+	db	$40
+	dw	$1e0
+	db	0,0
+	dw	initcont
+
+	db	$d0
+	dw	$110
+	db	0,0
+	dw	initcheck
+
+	db	$10	;x
+	dw	$160	;y
+	db	1,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+	db	$10	;x
+	dw	$40	;y
+	db	1,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+
+
+	db	0
+
+
+w0l4sprites
+	db	$70
+	dw	$100
+	db	0,0
+	dw	initcheck
+
+	db	$10	;x
+	dw	$180	;y
+	db	1,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+	db	$e0	;x
+	dw	$180	;y
+	db	$ff,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+	db	$10	;x
+	dw	$40	;y
+	db	1,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+	db	$e0	;x
+	dw	$40	;y
+	db	$ff,grasssnakepal	; initial dx, extra parameter
+	dw	initsnake0
+
+
+	db	$10
+	dw	$0c0
+	db	$0,$40		;x limits
+	dw	initsnake1
+
+	db	$10
+	dw	$0e0
+	db	$0,$60		;x limits
+	dw	initsnake1
+
+
+
+	db	0
+
+
+w0l5sprites
+	db	$20
+	dw	$110
+	db	0,0
+	dw	initcheck
+
+	db	$50
+	dw	$190
+	db	$48,$90		;x limits
+	dw	initsnake1
+
+;	db	$20
+;	dw	$070
+;	db	$40,$60		;x limits
+;	dw	initsnake1
+
+	db	$20
+	dw	$a0
+	db	0,0
+	dw	inittip
+
+	db	$01
+	dw	$1e0
+	dw	0
+	dw	initoneup
+
+	db	$e0
+	dw	$160
+	dw	0
+	dw	initoneup
+
+	db	$c0
+	dw	$110
+	dw	0
+	dw	inittime
+
+
+
+	db	0
+
+w1l0sprites
+	db	$a0
+	dw	$160
+	db	0,0
+	dw	initcheck
+
+	db	$a0
+	dw	$1d0
+	db	3,0
+	dw	initlturner
+
+	db	$70
+	dw	$1d0
+	db	1,0
+	dw	initrturner
+
+	db	$90
+	dw	$1e0
+	db	3,0
+	dw	initrturner
+
+	db	$40
+	dw	$140
+	dw	1
+	dw	initball0
+
+	db	$80
+	dw	$100
+	db	3,0
+	dw	initlturner
+
+	db	$b0
+	dw	$140
+	db	3,0
+	dw	initrturner
+
+	db	$70
+	dw	$190
+	db	0,0
+	dw	initcont
+
+	db	$70
+	dw	$d0
+	dw	0
+	dw	inittime
+
+
+	db	$90
+	dw	$1f0
+	db	0,0
+	dw	inittip
+
+
+
+	db	0
+
+w1l1sprites
+
+	db	$90
+	dw	$70
+	db	3,0
+	dw	initrturner
+
+	db	$50
+	dw	$d0
+	db	1,0
+	dw	initlturner
+
+	db	$d0
+	dw	$d0
+	db	3,0
+	dw	initrturner
+
+	db	$70
+	dw	$120
+	db	1,0
+	dw	initlturner
+
+	db	$b0
+	dw	$140
+	dw	1
+	dw	initball0
+
+	db	$40
+	dw	$160
+	dw	1
+	dw	initball0
+
+;	db	$60
+;	dw	$180
+;	db	3,0
+;	dw	initrturner
+
+;	db	$a0
+;	dw	$1c0
+;	db	1,0
+;	dw	initrturner
+
+	db	$60
+	dw	$1d0
+	dw	1
+	dw	initball0
+
+	db	$90
+	dw	$f0
+	db	0,0
+	dw	initcheck	
+
+	db	$30
+	dw	$1c0
+	db	0,0
+	dw	initcont
+
+	db	$a0
+	dw	$50
+	dw	0
+	dw	inittime
+
+
+
+	db	0
+
+w1l2sprites
+
+	db	$90
+	dw	$80
+	dw	1
+	dw	initball0
+
+	db	$30
+	dw	$90
+	dw	1
+	dw	initball0
+
+	db	$30
+	dw	$b0
+	dw	1
+	dw	initball0
+
+	db	$50
+	dw	$60
+	db	3,0
+	dw	initrturner
+
+	db	$e0
+	dw	$b0
+	db	2,0
+	dw	initrturner
+
+;	db	$50
+;	dw	$120
+;	db	3,0
+;	dw	initrturner
+
+	db	$80
+	dw	$150
+	db	3,0
+	dw	initrturner
+
+	db	$a0
+	dw	$1f0
+	db	1,1
+	dw	initrturner
+
+	db	$50
+	dw	$190
+	db	0,0
+	dw	initcheck
+
+	db	$80
+	dw	$1d0
+	db	0,0
+	dw	initcont
+
+
+	db	$b0
+	dw	$a0
+	dw	0
+	dw	inittime
+
+	db	$60
+	dw	$160
+	dw	0
+	dw	inittime
+
+	db	$d0
+	dw	$1d0
+	dw	0
+	dw	inittip
+
+
+
+	db	0
+w1l3sprites
+
+	db	$e0
+	dw	$140
+	db	3,0
+	dw	initlturner
+
+;	db	$40
+;	dw	$40
+;	db	3,0
+;	dw	initlturner
+
+
+	db	$e0
+	dw	$e0
+	dw	1
+	dw	initball0
+
+	db	$40
+	dw	$50
+	dw	1
+	dw	initball0
+
+	db	$50
+	dw	$140
+	dw	1
+	dw	initball0
+
+	db	$70
+	dw	$c0
+	dw	1
+	dw	initball0
+
+	db	$70
+	dw	$1e0
+	db	0,0
+	dw	inittip
+
+	db	$30
+	dw	$1b0
+	db	0,0
+	dw	initcont
+
+	db	$e0
+	dw	$130
+	db	0,0
+	dw	initcheck
+
+	db	$50
+	dw	$130
+	dw	0
+	dw	inittime
+
+
+
+	db	0
+w1l4sprites
+
+	db	$c0
+	dw	$d0
+	db	3,0
+	dw	initrturner
+
+	db	$60
+	dw	$120
+	db	3,0
+	dw	initrturner
+
+
+
+	db	$20
+	dw	$40
+	dw	1
+	dw	initball0
+
+	db	$60
+	dw	$50
+	dw	1
+	dw	initball0
+
+	db	$b0
+	dw	$50
+	dw	1
+	dw	initball0
+
+	db	$b0
+	dw	$120
+	dw	1
+	dw	initball0
+
+	db	$a0
+	dw	$1c0
+	dw	1
+	dw	initball0
+
+
+	db	$30
+	dw	$1d0
+	db	0,0
+	dw	initcont
+
+	db	$10
+	dw	$70
+	db	0,0
+	dw	initcheck
+
+	db	$50
+	dw	$120
+	dw	0
+	dw	inittime
+
+
+	db	0
+w1l5sprites
+	db	0
+w2l0sprites
+	db	$70
+	dw	$120
+	db	0,0
+	dw	initcheck	
+
+	db	0
+w2l1sprites
+	db	$50
+	dw	$1e0
+	db	0,0
+	dw	inittip
+
+	db	0
+w2l2sprites
+	db	$40
+	dw	$1e0
+	db	0,0
+	dw	initcont
+
+	db	$c0
+	dw	$70
+	db	0,0
+	dw	inittip
+
+	db	$80
+	dw	$b0
+	dw	0
+	dw	initoneup
+
+
+	db	0
+w2l3sprites
+
+	db	$70
+	dw	$e0
+	dw	0
+	dw	inittime
+
+	db	$60
+	dw	$130
+	dw	0
+	dw	initoneup
+
+	db	$50
+	dw	$1e0
+	db	0,0
+	dw	inittip
+
+	db	0
+w2l4sprites
+	db	$a0
+	dw	$1e0
+	db	0,0
+	dw	inittip
+	db	0
+w2l5sprites
+	db	$30
+	dw	$120
+	db	0,0
+	dw	initcheck
+
+	db	$40
+	dw	$1e0
+	db	0,0
+	dw	initcont
+
+	db	$b0
+	dw	$160
+	db	0,0
+	dw	inittip
+
+	db	$a0
+	dw	$80
+	dw	0
+	dw	inittime
+
+
+
+	db	0
+w3l0sprites
+
+	db	$80
+	dw	$1a0-4
+	db	$80,0
+	dw	initfish
+
+	db	$90
+	dw	$80-1
+	db	$90,0
+	dw	initfish
+
+	db	$70
+	dw	$e0
+	db	0,0
+	dw	initcheck	
+
+	db	$80
+	dw	$e0
+	db	0,0
+	dw	inittip
+
+	db	$c0
+	dw	$c0
+	dw	0
+	dw	inittime
+
+	db	$40
+	dw	$1e0
+	db	0,0
+	dw	initcont
+
+
+	db	0
+w3l1sprites
+	db	$50
+	dw	$1c0-4
+	db	$50,0
+	dw	initfish
+
+	db	$70
+	dw	$d0-4
+	db	$70,0
+	dw	initfish
+
+	db	$40
+	dw	$1e0
+	db	0,0
+	dw	inittip
+
+
+	db	0
+w3l2sprites
+
+	db	$b0
+	dw	$1b0
+	db	0,0
+	dw	initcheck
+
+
+	db	$50-8
+	dw	$180-1
+	db	$50-8,0
+	dw	initfish
+
+	db	$70
+	dw	$50-4
+	db	$70,0
+	dw	initfish
+
+	db	$c0
+	dw	$a0-4
+	db	$c0,0
+	dw	initfish
+
+	db	$e0
+	dw	$1b0
+	db	0,0
+	dw	inittip
+
+	db	$e0
+	dw	$160
+	dw	0
+	dw	inittime
+
+	db	$e0
+	dw	$110
+	dw	0
+	dw	initoneup
+
+
+
+	db	0
+w3l3sprites
+	db	$40
+	dw	$1e0
+	db	0,0
+	dw	initcont
+
+	db	$80
+	dw	$d0-4
+	db	$80,0
+	dw	initfish
+
+	db	$90-8
+	dw	$80-1
+	db	$90-8,0
+	dw	initfish
+
+	db	$60
+	dw	$50-4
+	db	$60,0
+	dw	initfish
+
+	db	0
+
+w3l4sprites
+
+
+	db	$90
+	dw	$1c0-4
+	db	$90,0
+	dw	initfish
+
+	db	$90
+	dw	$80-4
+	db	$90,0
+	dw	initfish
+
+	db	0
+
+w3l5sprites
+	db	$70
+	dw	$130
+	db	0,0
+	dw	initcheck
+
+	db	$50
+	dw	$120
+	db	0,0
+	dw	inittip
+
+;	db	$d0
+;	dw	$130
+;	dw	0
+;	dw	inittime
+
+	db	$90
+	dw	$30
+	dw	0
+	dw	initoneup
+
+;	db	$c0
+;	dw	$130
+;	dw	0
+;	dw	initoneup
+
+
+
+
+	db	0
+w4l0sprites
+	db	$50
+	dw	$1e0
+	db	0,0
+	dw	initcont
+
+	db	$20
+	dw	$c0
+	dw	patternw4a
+	dw	initbee0
+	
+	db	$20
+	dw	$c0
+	dw	0
+	dw	initoneup
+
+	db	$a0
+	dw	$190
+	dw	platpattern0
+	dw	initplat0
+
+	db	$c0
+	dw	$130
+	dw	platpattern1
+	dw	initplat0
+
+	db	$60
+	dw	$1f0
+	db	0,0
+	dw	inittip
+
+	db	$d0
+	dw	$d0
+	dw	0
+	dw	initoneup
+
+	db	$20
+	dw	$90
+	dw	0
+	dw	initoneup
+
+
+
+
+	db	0
+
+w4l1sprites
+
+	db	$90
+	dw	$60
+	dw	platpattern0
+	dw	initplat0
+
+	db	$30
+	dw	$70
+	dw	platpattern2
+	dw	initplat0
+
+	db	$e0
+	dw	$80
+	dw	platpattern0
+	dw	initplat0
+
+	db	$40
+	dw	$90
+	dw	platpattern2
+	dw	initplat0
+
+	db	0
+w4l2sprites
+	db	$d0
+	dw	$1c0
+	dw	platpattern0
+	dw	initplat0
+
+	db	$a0
+	dw	$190
+	dw	platpattern0
+	dw	initplat0
+
+	db	$c0
+	dw	$160
+	dw	platpattern0
+	dw	initplat0
+
+	db	$90
+	dw	$110
+	dw	platpattern0
+	dw	initplat0
+
+	db	$30
+	dw	$100
+	dw	platpattern2
+	dw	initplat0
+
+	db	$e0
+	dw	$f0
+	dw	platpattern0
+	dw	initplat0
+
+	db	$40
+	dw	$d0
+	dw	platpattern2
+	dw	initplat0
+
+	db	$e0
+	dw	$60
+	dw	platpattern0
+	dw	initplat0
+
+	db	$50
+	dw	$130
+	db	0,0
+	dw	inittime
+
+	db	$70
+	dw	$120
+	db	0,0
+	dw	initcheck
+
+	db	$60
+	dw	$1f0
+	db	0,0
+	dw	inittip
+
+	db	$90
+	dw	$130
+	db	0,0
+	dw	initoneup
+
+
+	db	$c0
+	dw	$1e0
+	db	0,0
+	dw	initoneup
+
+
+
+
+
+	db	0
+
+w5l0sprites
+
+	db	$40
+	dw	$1f0
+	db	0,0
+	dw	initcont
+
+	db	$40
+	dw	$160
+	dw	patternw5a
+	dw	initbee0
+
+	db	$30
+	dw	$e0
+	dw	patternw5b
+	dw	initbee0
+
+	db	$60
+	dw	$10
+	dw	patternw5c
+	dw	initbee0
+		
+	db	$30
+	dw	$1f0
+	db	0,0
+	dw	inittip
+
+	db	$e0
+	dw	$d0
+	dw	0
+	dw	inittime
+
+	db	$b0
+	dw	$f0
+	dw	0
+	dw	initcheck
+
+
+	db	$e0
+	dw	$160
+	db	8,0
+	dw	inittip
+
+
+	db	0
+
+w5l1sprites
+	db	$90
+	dw	$130
+	db	0,0
+	dw	initcheck	
+
+	db	$60
+	dw	$20
+	dw	patternw5c
+	dw	initbee0
+
+	db	$a0
+	dw	$180
+	db	0,0
+	dw	inittip
+
+	
+	db	0
+w5l2sprites
+
+	db	$50
+	dw	$d0
+	dw	patternw5d
+	dw	initbee0
+
+	db	$e0
+	dw	$f0
+	dw	0
+	dw	inittime
+
+	db	$50
+	dw	$f0
+	dw	0
+	dw	initoneup
+
+	db	$50
+	dw	$1e0
+	db	0,0
+	dw	inittip
+
+	db	$60
+	dw	$20
+	dw	patternw5c
+	dw	initbee0
+
+
+
+	db	0
+w5l3sprites
+	db	$40
+	dw	$1f0
+	db	0,0
+	dw	initcont
+
+	db	$01
+	dw	$90
+	dw	0
+	dw	initoneup
+
+	db	$d0
+	dw	$1c0
+	db	0,0
+	dw	inittip
+
+
+	db	0
+w5l4sprites
+	db	$60
+	dw	$c0
+	db	0,0
+	dw	initcheck	
+
+	db	$40
+	dw	$100
+	dw	patternw5e
+	dw	initbee0
+
+	db	$90
+	dw	$d0
+	dw	patternw5f
+	dw	initbee0
+
+
+	db	$c0
+	dw	$10
+	dw	patternw5c
+	dw	initbee0
+
+
+	db	$10
+	dw	$100
+	dw	0
+	dw	inittime
+	
+	db	$d0
+	dw	$100
+	dw	0
+	dw	initoneup
+
+	db	0
+w5l5sprites
+	db	$50
+	dw	$120
+	db	0,0
+	dw	initcheck	
+
+
+	db	$20
+	dw	$20
+	db	0,0
+	dw	initcheck	
+
+
+	db	$90
+	dw	$60
+	dw	patternw5g
+	dw	initbee0
+
+	db	$e0
+	dw	$30
+	dw	patternw5ca
+	dw	initbee0
+
+	db	$c0
+	dw	$10
+	dw	patternw5c
+	dw	initbee0
+
+
+
+
+	db	$20
+	dw	$70
+	dw	0
+	dw	initoneup
+
+	db	$e0
+	dw	$80
+	dw	0
+	dw	initoneup
+
+	db	$d0
+	dw	$120
+	dw	0
+	dw	inittime
+
+
+
+
+
+	db	0
+w6l0sprites
+	db	0
+
+bf0	equ	35*4
+bf1	equ	36*4
+bf2	equ	37*4
+bf3	equ	38*4
+bf4	equ	39*4
+babytab
+;	db	bf0,bfpal
+;	db	bf1,bfpal
+;	db	bf0,bfpal
+;	db	bf1,bfpal
+	db	bf2,bfpal
+	db	bf0,bfpal
+	db	bf1,bfpal
+	db	bf2,bfpal
+	db	bf0,bfpal
+	db	bf2,bfpal
+	db	bf1,bfpal
+	db	bf2,bfpal
+	db	bf3,poofpal
+	db	bf2,bfpal
+	db	bf3,poofpal
+	db	bf4,poofpal
+	db	bf3,poofpal
+	db	bf4,poofpal
+	db	bf3,poofpal
+	db	bf4,poofpal
+
+
+treastab		;treasure room # related to this level
+	db	0,0,0,0,0,0,0
+	db	1,1,1,1,1,1,1
+	db	2,2,2,2,2,2,2
+	db	3,3,3,3,3,3,3
+	db	4,4,4,4
+
+spinpoof
+	db	$2a,$2b,$2c,$2d,$2e,$2f,$30,$31
+	db	$2a,$2b,$2c,$2d,$2e,$2f,$30,$31
+	db	$2a,$2b,$2c,$2d,$2e,$2f,$30,$31
+	db	$2a,$2b,$2c,$2d,$2e,$2f,$30,$31
+	db	$2a,$2b,$2c,$2d,$2e,$2f,$30,$31
+	db	$52,$52,$53,$52,$53,$ff,$ff,$ff
+	db	$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db	$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+;	db	$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+;	db	$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+;	db	$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+
+
+collisiontab
+	dw	w0cols
+	dw	w1cols
+	dw	w2cols
+	dw	w3cols
+	dw	w4cols
+	dw	w5cols
+	dw	w6cols
+
+
+w0cols
+	db	1*4,(1+1)*4	;exit
+	db	8*4,(21+1)*4	;float
+	db	46*4,(59+1)*4	;hit
+	db	waterchar,waterchar+14 ;drown
+	db	22*4,(25+1)*4	;ice
+	db	0,0	;glue
+	db	34*4,(34+1)*4	;wall
+	db	49*4,(56+1)*4	; mask characters
+
+w1cols
+	db	59*4,(59+1)*4	;exit
+	db	24*4,(24+1)*4		;float
+	db	25*4,(28+1)*4		;hit
+	db	$ff,$ff		;drown
+	db	$ff,$ff	;ice
+	db	$ff,$ff	;glue
+	db	0,0	;wall
+	db	0,0
+w2cols
+	db	20*4,(21+1)*4	;exit
+	db	28*4,(31+1)*4		;float
+	db	7*4,(9+1)*4	;hit
+	db	27*4,(27+1)*4		;drown
+	db	0,0	;ice
+	db	0,0	;glue
+	db	37*4,(46+1)*4	;wall
+	db	1*4,(2+1)*4	;hit
+
+w3cols
+	db	1*4,(1+1)*4	;exit
+	db	50*4,(52+1)*4		;float
+	db	0,0	;hit
+	db	10*4,(19+1)*4 	;drown
+	db	20*4,(41+1)*4	;ice
+	db	0,0	;glue
+	db	0,0	;wall
+	db	0,0
+w4cols
+	db	1*4,(1+1)*4	;exit
+	db	3*4,(3+1)*4		;float
+	db	0,0 	;hit
+	db	12*4,(12+1)*4	;drown (acts as hit for rails)
+	db	0,0	;ice
+	db	0,0	;glue
+	db	14*4,(24+1)*4	;wall
+	db	0,0
+w5cols
+	db	1*4,(1+1)*4	;exit
+	db	7*4,(10+1)*4	;float
+	db	49*4,(54+1)*4	;hit
+	db	waterchar,waterchar+15 ;drown
+	db	0,0	;ice
+	db	0,0	;glue
+	db	24*4,(34+1)*4	;wall
+	db	0,0
+w6cols
+	db	59*4,(59+1)*4	;exit
+	db	0,0		;float
+	db	0,0	;hit
+	db	0,0 	;drown
+	db	0,0	;ice
+	db	0,0	;glue
+	db	0,0	;wall
+	db	0,0
+
+
+frogframes
+;north				;0 - 7
+	db	$00,$00*4
+	db	$00,$01*4
+	db	$00,$02*4
+	db	$00,$03*4
+	db	$00,$04*4
+	db	$00,$05*4
+	db	$00,$06*4
+	db	$00,$1d*4
+;east
+	db	$00,$07*4	;8 - f
+	db	$00,$08*4
+	db	$00,$09*4
+	db	$00,$0a*4
+	db	$00,$0b*4
+	db	$00,$0c*4
+	db	$00,$0d*4
+	db	$00,$1e*4
+;south				;$10 - $17
+	db	$00,$0e*4
+	db	$00,$0f*4
+	db	$00,$10*4
+	db	$00,$11*4
+	db	$00,$12*4
+	db	$00,$13*4
+	db	$00,$14*4
+	db	$20,$1e*4
+;west				;$18 - $1f
+	db	$20,$07*4
+	db	$20,$08*4
+	db	$20,$09*4
+	db	$20,$0a*4
+	db	$20,$0b*4
+	db	$20,$0c*4
+	db	$20,$0d*4
+	db	$20,$1d*4
+diveframe	equ	$20
+;exit				;$20 - $23
+	db	$00,$15*4
+	db	$00,$16*4
+	db	$00,$17*4
+	db	$00,$18*4
+
+fallframes	equ	$24
+;fall		     		;$24 - $27
+	db	$00,$19*4
+	db	$00,$1a*4
+	db	$00,$1b*4
+	db	$00,$1c*4
+dieframes	equ	$28
+;ghost				;$28 - $29
+	db	$00,$1f*4
+	db	$00,$20*4
+	
+
+iceframes	equ	$2a
+;spinning		   	;$2a - $31
+	
+	db	$00,$00*4
+	db	$00,$1d*4
+	db	$00,$07*4	
+	db	$00,$1e*4
+	db	$00,$0e*4
+	db	$20,$1e*4
+	db	$20,$07*4
+	db	$20,$1d*4
+
+idles	equ	$32
+;idle frames			;8 for each facing $32 - $51
+
+	db	$00,$00*4
+	db	$00,$05*4
+	db	$00,$06*4
+	db	$00,$05*4
+	db	$20,$06*4
+	db	$00,$00*4
+	db	$00,$00*4
+	db	$00,$00*4
+
+	db	$00,$07*4
+	db	$00,$0c*4
+	db	$00,$0d*4
+	db	$00,$0c*4
+	db	$00,$0d*4
+	db	$00,$07*4
+	db	$00,$07*4
+	db	$00,$07*4
+
+	db	$00,$0e*4
+	db	$00,$13*4
+	db	$00,$14*4
+	db	$00,$13*4
+	db	$20,$14*4
+	db	$00,$0e*4
+	db	$00,$0e*4
+	db	$00,$0e*4
+
+	db	$20,$07*4
+	db	$20,$0c*4
+	db	$20,$0d*4
+	db	$20,$0c*4
+	db	$20,$0d*4
+	db	$20,$07*4
+	db	$20,$07*4
+	db	$20,$07*4
+
+; poof	$52 - $53
+
+	db	poofpal,bf3
+	db	poofpal,bf4
+
+
+trecword	
+	db	"  NEW RECORD TIME!  ",0
+timeword
+	db	"     YOUR TIME",$d,0
+
+recordword
+	db	"     RECORD TIME",$d,0
+holderword
+	db	"   RECORD HOLDER",$d,0
+gemsword
+	db	"   GEMS COLLECTED",$d,0
+clearedword
+	db	"   LEVEL CLEARED!   ",0
+perfectword
+	db	"   PERFECT LEVEL!   ",0
+
+scoreword
+	db	"   CURRENT SCORE",$d,0
+
+
+blankline
+	db	"                    ",0
+
+romscores
+	db	4,6,9,5		;
+	db	3,1,6,0		;
+	db	2,5,7,3
+	db	1,8,2,0		;
+	db	1,4,9,2
+	db	0,9,0,3	        ;
+	db	0,6,2,8		;
+	db	0,3,6,5
+
+
+	db	"ALISON  "
+	db	"MIKEY   "
+	db	"BRIAN   "
+	db	"FERNY   "
+	db	"BRITTANY"
+	db	"ALISA   "
+	db	"BRAD    "
+	db	"NATALIE "
+
+
+
+vy	equ	$38
+vx	equ	$38
+
+vistab
+	db	vx+0,vy+0
+	db	vx+$10,vy+0
+	db	vx+$20,vy+0
+	db	vx+$30,vy+0
+	db	vx+$40,vy+0
+	db	vx+$50,vy+0
+	db	vx+$60,vy+0
+
+	db	vx+0,vy+$18
+	db	vx+$10,vy+$18
+	db	vx+$20,vy+$18
+	db	vx+$30,vy+$18
+	db	vx+$40,vy+$18
+	db	vx+$50,vy+$18
+	db	vx+$60,vy+$18
+
+	db	vx+0,vy+$30
+	db	vx+$10,vy+$30
+	db	vx+$20,vy+$30
+	db	vx+$30,vy+$30
+	db	vx+$40,vy+$30
+	db	vx+$50,vy+$30
+	db	vx+$60,vy+$30
+
+	db	vx+0,vy+$48
+	db	vx+$10,vy+$48
+	db	vx+$20,vy+$48
+	db	vx+$30,vy+$48
+	db	vx+$40,vy+$48
+	db	vx+$50,vy+$48
+	db	vx+$60,vy+$48
+
+	db	vx+0,vy+$60
+	db	vx+$10,vy+$60
+	db	vx+$20,vy+$60
+	db	vx+$30,vy+$60
+	db	vx+$40,vy+$60
+	db	vx+$50,vy+$60
+	db	vx+$60,vy+$60
+
+vrtab				;next value when moving right
+	db	$01,$02,$03,$04,$05,$06,$00
+	db	$08,$09,$0a,$0b,$0c,$0d,$07
+	db	$0f,$10,$11,$12,$13,$14,$0e
+	db	$16,$17,$18,$19,$1a,$1b,$15
+	db	$1d,$1e,$1f,$1c
+
+
+vltab				;next value when moving left
+	db	$06,$00,$01,$02,$03,$04,$05
+	db	$0d,$07,$08,$09,$0a,$0b,$0c
+	db	$14,$0e,$0f,$10,$11,$12,$13
+	db	$1b,$15,$16,$17,$18,$19,$1a
+	db	$1f,$1c,$1d,$1e
+
+vutab				;next value when moving up
+	db	$1c,$1d,$1e,$1f,$19,$1a,$1b
+	db	$00,$01,$02,$03,$04,$05,$06
+	db	$07,$08,$09,$0a,$0b,$0c,$0d
+	db	$0e,$0f,$10,$11,$12,$13,$14
+	db	$15,$16,$17,$18,$19,$1a,$1b
+
+vdtab				;next value when moving down
+	db	$07,$08,$09,$0a,$0b,$0c,$0d
+	db	$0e,$0f,$10,$11,$12,$13,$14
+	db	$15,$16,$17,$18,$19,$1a,$1b
+	db	$1c,$1d,$1e,$1f,$04,$05,$06
+	db	$00,$01,$02,$03
+
+
+
+

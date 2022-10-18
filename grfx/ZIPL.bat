@@ -1,0 +1,19 @@
+copy LEGAL1.TGA \temp\temp3
+copy LTRAN.TGA \temp\temp3
+copy CREDIT1.TGA \temp\temp3
+copy CREDIT2.TGA \temp\temp3
+copy SEL.TGA \temp\temp3
+copy ENTER.TGA \temp\temp3
+copy ERASE.TGA \temp\temp3
+copy OPTION.TGA \temp\temp3
+copy GAMEO1.TGA \temp\temp3
+copy HASBRO13.TGA \temp\temp3
+copy HISCORE.TGA \temp\temp3
+copy GOPTION.TGA \temp\temp3
+copy GUEST.TGA \temp\temp3
+copy NEWFROG2.tga \temp\temp3
+copy cset.gbr \temp\temp3
+copy cset1.gbr \temp\temp3
+copy cset2.gbr \temp\temp3
+copy hintset.gbr \temp\temp3
+

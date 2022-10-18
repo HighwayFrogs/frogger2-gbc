@@ -1,0 +1,2934 @@
+; game-specific subroutines
+
+develcode			;temp code for switching worlds
+l0
+	ld	a,(cnt1)
+	and	start
+	cp	start
+	ret	nz
+l0
+	call	wait_vb
+	call	read_keys
+	ld	a,(cnt1)
+	and	start
+	cp	start
+	jr	z,l0
+	ld	a,(level)
+	inc	a
+	cp	maxlevel
+	jr	nz,l1
+	xor	a
+l1
+	ld	(level),a
+	call	initlevel
+	ret
+
+
+
+	
+resetscreen
+	xor	a
+	ld	(scx),a
+	ld	(scy),a
+	ld	(screenx),a
+	ld	(screeny),a
+	ld	hl,xlane
+	ld	c,numlanes
+	call	zerohlc
+	ret
+
+
+mapwords	;hl = source, de = dest, bc = count
+
+l0
+	xor	a
+	ld	(vbk),a
+	ld	a,(hli)
+	ld	(de),a
+	ld	a,1
+	ld	(vbk),a
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l0
+	dec	b
+	jr	nz,l0
+	xor	a
+	ld	(vbk),a
+	ret
+
+movehldecv			;move hl -> de, count = c in vram
+
+l0
+	ld	a,(hli)
+	push	af
+l1
+	ld	a,(stat)
+	and	2
+	jr	nz,l1
+	pop	af
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l0
+	ret
+
+
+initfrog		;start frog in oam and init frog variables
+	ld	a,spritebank
+	call	forcebank
+	ld	hl,0+sprites
+	call	getspal
+	ld	a,spnum
+	call	getsfont1
+	ld	a,1
+	call	forcebank
+	call	initfrogvars
+	call	drawfrog
+	call	calclane
+	ld	(lowy),a	;0 - $1f
+	ret
+
+initfrogvars
+	xor	a
+	ld	hl,frogvars
+	ld	c,frogvarend-frogvars
+	call	zerohlc
+	ret
+
+getspf
+	call	getspal
+	call	getsfont
+	ret
+getspal			;hl = start of palette
+	ld	de,$ff6a	;object palette address register
+	ld	a,$80
+	ld	(de),a		;start at palette 0, auto increment
+
+	ld	de,$ff6b	;object palette data register
+	ld	b,$40		;64 bytes of data
+l0
+	ld	a,(hli)
+	ld	(de),a
+	dec	b
+	jr	nz,l0
+	ret
+getsfont
+	ld	a,(hli)	;font size 
+getsfont1
+	ld	c,a
+	ld	de,$8000
+l0
+	ld	b,$10
+l1
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec	b
+	jr	nz,l1
+	dec	c
+	jr	nz,l0
+	ret
+
+
+drawfrog			;get 8 bytes from data (frogframe*8)
+				;4 chars. and attrib for each cell
+				;x and y offset for shape, dummy byte
+				;and move to oamshad, adjusting
+ 				;x and y values for frogx, frogy
+l0
+			;adjustments for dying, etc. (do later)
+l1		
+	ld	a,(frogx)
+	ld	d,a
+	ld	a,(frogy)
+	ld	e,a
+	ld	a,(dying)
+	and	a
+	jr	z,alive
+	ld	a,(frogframe)
+	and	$fe	;ignore jumping frames
+	srl	a
+	add	a,8
+	jr	doframe
+alive
+	ld	a,(frogframe)
+doframe
+	ld	d,a
+	sla	a
+	sla	a
+	sla	a
+	ld	hl,frogframes
+	add	a,l
+	ld	l,a
+	jr	nc,l3
+	inc	h
+l3
+	ld	b,frogpal
+	   		;hl points to desired from frame
+			;store characters and attribute
+	ld	a,(hli)
+	ld	(oamshad+2),a	;first char
+	ld	a,(hli)
+	ld	(oamshad+6),a	;2nd char
+	ld	a,(hli)
+	ld	(oamshad+$a),a	;3rd char
+	ld	a,(hli)
+	ld	(oamshad+$e),a	;4th char
+	ld	a,(hli)		;attrib
+	or	b
+	ld	(oamshad+3),a
+	ld	(oamshad+7),a
+	ld	(oamshad+$b),a
+	ld	(oamshad+$f),a
+
+				;now do x and y
+
+	ld	a,(hli)
+	ld	b,a
+	ld	a,(frogx)
+	add	a,b
+	add	a,8		;offset to line up sprites
+
+	ld	(oamshad+1),a
+	ld	(oamshad+9),a
+	add	a,8
+	ld	(oamshad+5),a
+	ld	(oamshad+$d),a
+
+	ld	a,(hl)
+	ld	b,a
+	ld	a,(frogy)
+	add	a,b
+	add	a,$10		;offset since oam draws sprites off by $10
+
+	ld	(oamshad+0),a
+	ld	(oamshad+4),a
+	add	a,8
+	ld	(oamshad+8),a
+	ld	(oamshad+$c),a
+	ret
+
+gamecode
+	call	whichscreen
+	call	collisions
+	call	frogcode
+	call	whichscreen
+	call	scrollcode
+	ld	de,freeoam+oamshad
+	call	saveoamptr
+	call	drawgems
+	call	dosprites
+	call	clroamptr
+;	call	dostats
+	call	dobar
+	call	scorecode
+	ld	hl,gamecodetab
+	ld	a,(level)
+	jp	tablejump
+	ret
+
+scorecode
+	ld	hl,scorebuf
+	ld	a,(hl)
+	and	a
+	ret	z
+	ld	a,(frame)
+	and	$f
+	ret	nz
+	dec	(hl)
+	jp	addten
+
+frogcode
+	call	jumping
+	call	positions
+	call	drawfrog
+	ret
+
+
+jumping
+
+	ld	a,(dying)
+	and 	a
+	jp	nz,dodying	;nojump
+	ld	a,(jumpcount)	;doing a jump?
+	and	a
+	jp	nz,dojump	;yes
+				;no, check joystick
+	ld	a,(trg1)
+	rlc	a
+	jr	c,jdown
+	rlc	a
+	jr	c,jup
+	rlc	a
+	jr	c,jleft
+	rlc	a
+	jr	nc,nojump
+			 ;must follow
+jright
+	call	testright
+	jr	c,nojump
+	call	fudgetestr
+	ld	d,a		;jlength
+	ld	bc,$0100	;dx, dy
+	ld	e,3
+	jp	jover
+
+jleft
+	call	testleft
+	jr	c,nojump
+	call	fudgetestl
+	ld	d,a		;jlength
+	ld	bc,$ff00	;dx, dy
+	ld	e,7
+	jp	jover
+jup
+	call	testup
+	jr	c,nojump
+	
+	ld	hl,lowy
+	ld	a,(froglane)
+	cp	(hl)
+	call	z,hoppoint
+	call	topstrip	;get a new strip for screen top
+
+	ld	bc,$00ff	;dx, dy
+	ld	a,$10		;(jylen)
+	ld	d,a
+	ld	e,1
+	jp	jover
+jdown
+	call	testdown
+	jr	c,nojump
+	call	botstrip
+	ld	bc,$0001	;dx, dy
+	ld	a,$10		;(jylen)
+	ld	d,a
+	ld	e,5
+jover
+	ld	a,(ttype)
+	cp	tglue
+	jr	nz,notglue	
+	ld	a,(gluecount)
+	dec	a
+	ld	(gluecount),a
+	jr	z,glueover
+	jr	sameframe	;want to make him jerk, but face same way
+glueover
+	ld	(ttype),a	;a = 0
+	ld	(jtype),a
+notglue
+	ld	a,e
+	ld	(frogframe),a
+	ld	a,jnorm
+	ld	(jtype),a
+sameframe
+	ld	a,d		;fjumplen
+	ld	(jumpcount),a	
+	ld	a,b
+	ld	(jumpx),a
+	ld	a,c
+	ld	(jumpy),a
+
+
+	if	audio
+	ld	a,jump_s
+	call	gsetsnd
+	endif
+
+nojump
+	ret
+dojump
+	ld	a,(jtype)
+	cp	jnorm
+	jr	z,normjump
+	cp	jice
+	jr	z,icejump
+	cp	jglue
+	jr	z,gluejump
+	ret
+gluejump
+l0
+	ld	a,(jumpcount)
+	dec	a
+	ld	(jumpcount),a
+;	jr	z,cleartype
+	cp	$e
+	jp	z,morejmp1	;make him jerk
+	cp	$d
+	jr	z,morejmp1
+	cp	$c
+	jr	nz,l1
+	call	z,morejmp1
+	ld	a,(jumpx)
+	ld	b,a
+	xor	a
+	sub	b
+	ld	(jumpx),a
+	ld	a,(jumpy)
+	ld	b,a
+	xor	a
+	sub	b
+	ld	(jumpy),a	
+	ret
+l1
+	cp	6
+	jr	z,morejmp1
+	cp	4
+	jr	z,morejmp1
+	cp	1
+	jr	z,morejmp1
+	ret
+
+
+icejump
+	ld	a,(frame)
+	and	3
+	cp	1
+	call	z,botstrip
+	ld	a,(frame)
+	and	3
+	cp	3
+	call	z,topstrip
+	ld	a,(frame)
+	and	3
+	ret	nz
+	ld	hl,jumpcount
+	dec	(hl)
+	jr	nz,morejmp1
+cleartype
+	xor	a
+	ld	(jtype),a
+	ret
+
+normjump
+	ld	a,(frame)
+	and	$1	;$3
+	ret	nz
+	ld	a,(jumpcount)
+	dec	a	;decrement jump count
+	ld	(jumpcount),a
+	jr	nz,morejmp	;not done
+	ld	a,(frogframe)
+	and	$fe		;static frames are 0,2,4,6
+	ld	(frogframe),a
+	jr	morejmp1
+morejmp
+morejmp1
+	ld	a,(truex)
+	ld	b,a
+	ld	a,(jumpx)
+	add	a,b
+	ld	(truex),a
+mj1
+	ld	a,(truey)
+	ld	b,a
+	ld	c,a		;save
+	ld	a,(jumpy)
+	add	a,b
+	ld	(truey),a
+	cp	c		;changed
+	ret	z		;no
+
+	push	af		;if yloc = mutliple of 8, then
+				;time to bring in a new strip
+
+	and	$f
+	cp	8
+	call	z,strip8
+
+	pop	af		;restore current truey
+
+	and	a		;became 0
+	jr	z,enter2	;entered screen 2
+	cp	$ff
+	jr	z,enter1	;entered screen 1
+	ret
+
+enter2
+	ld	a,1
+	ld	(truey+1),a
+	ret
+enter1
+	xor	a
+	ld	(truey+1),a
+	ret
+
+
+strip8
+	ld	a,(jumpy)
+	and	a
+	ret	z	;shouldn't happen
+	cp	1
+	jp	z,botstrip
+	jp	topstrip
+
+gamevb
+	ld	a,(vbk)
+	push	af
+	call	calcirq		;get pointer to first lane
+	call	colorcycle
+	call	animate
+	call	updatestatus
+	pop	af
+	ld	(vbk),a
+	ret
+;	ld	a,(world)
+;	ld	hl,gamevbtab
+;	jp	tablejump
+
+	ret
+
+testup
+	ld	a,(truey+1)
+	and	a
+	jr	nz,allow	;in bottom screen, so okay
+	ld	a,ymin
+	ld	b,a
+	ld	a,(truey)
+	cp	b
+	jr	nc,allow
+	jr	disallow
+testleft
+	ld	a,xmin
+	ld	b,a
+	ld	a,(truex)
+	cp	b
+	jr	nc,allow
+	jr	disallow
+testdown
+	ld	a,(truey+1)
+	and	a
+	jr	z,allow		;in upper screen, so can always go down
+	ld	a,ymax
+	ld	b,a
+	ld	a,(truey)
+	cp	b
+	jr	c,allow
+	jr	disallow
+testright
+	ld	a,xmax
+	ld	b,a
+	ld	a,(truex)
+	cp	b
+	jr	c,allow
+	jr	disallow
+
+disallow
+	scf
+	ret
+allow
+	and	a	;clears carry
+	ret
+
+newgame			;will set up here with # of frogs, etc.
+	ld	a,5
+	ld	(menleft),a
+	ret	
+
+initlevel
+	call	lcd_off
+	ld	a,(level)
+	add	a,a
+	ld	hl,levtab
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+	call	stuffhl		;put (hl) into hl
+	ld	de,levdatastart
+	ld	c,levdataend-levdatastart
+	call	movehldec
+
+	
+	ld	hl,lanespd	;init timers
+	ld	de,lanetime
+	ld	c,NUMLANES
+	call	movehldec
+
+	ld	hl,xlane
+	ld	c,NUMLANES
+	call	zerohlc
+
+
+	ld	a,(levbank)
+	call	forcebank
+	ld	hl,levfont	;get font, initial map, andpalette
+	call	stuffhl
+	call	getfont1
+	ld	hl,levmap
+	call	stuffhl
+	call	initmap
+	ld	hl,levpal
+	call	stuffhl
+	call	getpal
+
+	call	initcommon	;anyhting that's the same for all levels
+	call	initfrog	;get frog graphics and init variables
+	call	initgems
+	call	initsprites
+	call	startvals
+
+
+	if devel
+	ld	hl,debugfont
+	ld	de,$87c0	;use characters $7c - $7f
+	ld	c,$40
+	call	movehldec
+	ld	a,$20
+	ld	(oamshad+$9c),a
+	ld	(oamshad+$9d),a
+	ld	a,$7c
+	ld	(oamshad+$9e),a
+	endif
+
+
+	ld	a,1
+	call	forcebank
+	call	initstat
+
+	ld	a,3+$60
+	ld	(lcdc),a
+
+;	call	dummylanes	;temp
+
+
+	ld	a,$40
+	ld	(stat),a	;enable lcdc irq
+
+
+	call	lcd_on
+	ret
+
+stuffhl		; hl <- (hl)
+	ld	a,(hli)
+	ld	h,(hl)
+	ld	l,a
+	ret
+
+initmap
+	jp	cellmap
+
+initcommon
+	call	positions
+;	call	initstats
+	ret
+
+positions	;get frog and screen values based on true coordinates
+
+	ld	a,(truex)
+	sub	$50
+	jr	c,zerox1
+	cp	$60
+	jr	c,dox1
+	ld	a,$5f
+	jr	dox1
+zerox1
+	xor	a
+dox1
+	ld	(screenx),a
+
+
+	ld	a,(screenx)
+	ld	b,a
+	ld	a,(truex)
+	sub	b
+	ld	(frogx),a
+
+	ld	a,(truey+1)
+	and	a
+	jr	nz,screen2pos
+				;frog is in upper screen
+				; if truey < $48, then screeny = 0
+				;if truey > $48 then screeny = (truey - $48)
+	ld	a,(truey)
+	sub	$50
+	jr	c,zeroy1
+	jr	doy1
+
+
+screen2pos			;frog is in lower screen
+		    		
+	ld	a,(truey)
+	sub	$50
+	jr	c,doy1
+	cp	$70
+	jr	c,doy1
+	ld	a,$70
+	jr	doy1
+zeroy1
+	xor	a
+doy1
+	ld	(screeny),a
+
+	ld	a,(screeny)
+	ld	b,a
+	ld	a,(truey)
+	sub	b
+	ld	(frogy),a
+
+
+
+	ret
+
+botstrip
+	ld	a,(truey)
+	add	a,$48
+	ld	(nextstrip),a
+	ld	a,(truey+1)
+	adc	a,0
+	ld	(nextstrip+1),a
+	cp	$2
+	ret	z
+	jp	stripcode
+
+topstrip			;find next top strip to draw before it scrolls on
+
+;method get truey-$60
+;if borrow, then screen is already at top
+
+	ld	a,(truey)
+	sub	$60
+	ld	(nextstrip),a
+	ld	a,(truey+1)
+	sbc	a,0	
+	ld	(nextstrip+1),a
+	cp	$ff
+	ret	z
+	jp	stripcode
+
+
+stripcode
+
+
+				;now calculate the address of the data
+				;and the screen address
+				;offset for each is (nextstrip/8)*32
+				;or (nextstrip)*4
+	ld	h,a	;nextstrip+1
+	ld	a,(nextstrip)
+	and	$f8	;just care about row coordinate
+	ld	l,a
+	sla	l
+	rl	h
+	sla	l
+	rl	h	;*4
+	push	hl
+	pop	de
+	ld	hl,$9800
+	add	hl,de	
+	ld	a,h
+	and	$fb	;if buffer is 2nd block, screen address will
+			;be off by $400
+	ld	h,a
+	push	hl
+	ld	hl,mapbuff
+	add	hl,de
+	pop	de
+	xor	a
+	push	de	;save screen address
+	push	hl 	;save map address
+	ld	(vbk),a
+	call	write32
+	ld	de,32*64	;offset to attribute table
+	pop	hl
+	add	hl,de		;now points to attribute data for this strip
+	pop	de		;screen address
+	ld	a,1
+	ld	(vbk),a
+	call	write32
+	xor	a
+	ld	(vbk),a
+	ret
+
+write32		;writes (hl) > (de) 32 times
+
+	ld	b,32
+l0
+	ld	a,(hli)
+	ld	c,a
+l1
+	ld	a,(stat)
+	and	2
+	jr	nz,l1
+	ld	a,c
+	ld	(de),a
+	inc	de
+	dec	b
+	jr	nz,l0
+	ret
+
+
+;dummylanes
+;	ld	hl,lanedata
+;	ld	de,xlane
+;	ld	c,NUMLANES
+;	call	movehldec
+;	ret
+;lanedata
+;	db	$00,$f8,$f0,$e8,$e0
+;	db	$d8,$d0,$c8,$c0
+;	db	$b8,$b0,$a8,$a0
+;	db	$98,$90,$88,$80
+;	db	$78,$70,$68,$60
+;	db	$58,$50,$48,$40
+;	db	$38,$30,$28,$20
+;	db	$18,$10,$08,$00
+
+lcdcirq
+	push	af
+	push	hl
+	push	bc
+    	push	de
+; index scroll value (from ram) and next LYC value (from table
+
+	ld	a,(screenx)
+	ld	c,a
+	ld	hl,nextlane
+	inc	(hl)
+	ld	a,(hl)
+	ld	hl,xlane
+	add	a,l
+	ld	l,a
+	ld	a,(hl)
+	add	a,c
+	ld	hl,STAT
+l0	bit	1,(hl)
+	jr	nz,l0	 
+	ld	(scx),a
+	sub	c
+	ld	hl,stripetab
+	and	7
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+	ld	a,(hl)
+
+	ld	hl,STAT
+	
+l0	bit	1,(hl)
+	jr	nz,l0	 
+	ld	(lcloc),a
+	ld	(lcloc+32),a
+	swap	a
+	ld	(lcloc+1),a
+	ld	(lcloc+33),a
+
+
+
+	ld	a,(lyshad)
+	add	a,$10
+	ld	(lyshad),a
+	cp	144
+	jr	nc,noirq
+l0	bit	1,(hl)
+	jr	z,l0	 
+l0	bit	1,(hl)
+	jr	nz,l0	 
+	ld	(lyc),a
+
+noirq
+	pop	de
+	pop	bc
+	pop	hl
+	pop	af
+	
+	reti
+
+
+stripetab
+	db	$0f,$87,$c3,$e1,$f0,$78,$3c,$1e
+;	db	$0f,$1e,$3c,$78,$f0,$e1,$c3,$87
+
+calcirq			;get hscroll value for top lane and offset
+			;for irq of first full lane
+
+	ld	a,(screeny)	;first lane = screeny/16
+				;but if truey - screeny >= $100
+				;then add 16 lanes
+
+	ld	b,a		;get first on screen irq
+	and	$f		; ly = (0 - (screeny & $f)) & $f
+	ld	c,a
+	ld	a,$f
+	sub	c
+	and	$f
+	ld	(lyc),a		;first lcd irq value after (partial) top lane
+	ld	(lyshad),a
+	ld	a,b
+	and	$f0
+	swap	a
+	ld	c,a		;first lane
+
+	ld	a,(truey)
+	sub	b
+	ld	a,(truey+1)
+	sbc	a,0
+	and	a
+	jr	z,laneok
+	ld	a,c
+	add	a,$10
+	ld	c,a
+laneok
+	ld	a,c
+	ld	(nextlane),a
+
+	ld	hl,xlane
+	add	a,l
+	ld	l,a
+	ld	a,(hl)
+	ld	b,a
+	ld	a,(screenx)
+	add	a,b	
+	ld	(scx),a
+	ld	a,b
+;	sub	b
+	ld	hl,stripetab
+	and	7
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+	ld	a,(hl)
+
+	ld	hl,STAT
+	
+l0	bit	1,(hl)
+	jr	nz,l0	 
+	ld	(lcloc),a
+	ld	(lcloc+32),a
+	swap	a
+	ld	(lcloc+1),a
+	ld	(lcloc+33),a
+
+
+
+
+	ret
+	
+
+
+;lcdcirq
+	push	af
+	push	hl
+	push	bc
+
+; index scroll value (from ram) and next LYC value (from table
+
+	ld	hl,lanecount
+	ld	a,(hl)
+	inc	(hl)
+	ld	b,(hl)
+	ld	hl,xlane
+	add	a,l
+	ld	l,a
+	ld	a,(hl)
+	ld	hl,STAT
+	
+L0	bit	1,(hl)
+	jr	nz,L0	 
+	ld	(scx),a
+	ld	hl,lytab
+	ld	a,b
+	add	a,l
+	jr	nc,l9
+	inc	h
+l9
+	ld	l,a
+	ld	a,(hl)
+	ld	(LYC),a
+
+	pop	bc
+	pop	hl
+	pop	af
+	
+	reti
+
+lytab		;table of lane y values for irq
+
+	db	$17
+	db	$1f
+	db	$27
+	db	$2f
+	db	$37
+	db	$3f
+	db	$47
+	db	$4f
+	db	$57
+	db	$5f
+	db	$67
+	db	$6f
+	db	$17
+
+scrollcode
+	xor	a
+	ld	hl,lanetime
+	ld	de,lanespd
+	ld	bc,xlane
+l0
+	push	af
+	ld	a,(hl)
+	and	a
+	jr	z,still1	;no scroll for this lane	
+	bit	7,a
+	jr	z,posscroll
+negscroll
+	inc	(hl)
+	jr	nz,still
+	ld	a,(bc)
+	inc	a
+	ld	(bc),a
+	ld	a,(de)
+	ld	(hl),a	;reset speed counter
+	jr	still
+posscroll
+	dec	(hl)
+	jr	nz,still
+	ld	a,(bc)
+	dec	a
+	ld	(bc),a
+	ld	a,(de)
+	ld	(hl),a	;reset speed counter
+	jr	still
+still1
+;	ld	a,(screenx)
+;	ld	(bc),a
+still
+	inc	hl
+	inc	de
+	inc	bc
+	pop	af
+	inc	a
+	cp	numlanes
+	jr	nz,l0
+	ret
+
+cellmap			;get cell map from rom and place in ram
+			;and on screen
+			;enter with hl = map address
+
+	ld	de,mapbuff
+	ld	bc,mapbuff+$20
+l0
+	ld	a,$20	;do 32 rows
+l1
+	push	af
+l2
+	ld	a,(hli)		;get a cell
+	add	a,a
+	add	a,a		;*4
+	ld	(de),a
+	inc	a
+	inc	de
+
+	ld	(bc),a
+	inc	a
+	inc	bc
+
+
+	ld	(de),a
+	inc	de
+	inc	a
+
+	ld	(bc),a
+	inc	bc
+
+	ld	a,e
+	and	$1f
+	jr	nz,l2
+
+	ld	a,e
+	add	a,$20
+	ld	e,a
+	jr	nc,dok
+	inc	d
+dok
+	ld	a,c
+	add	a,$20
+	ld	c,a
+	jr	nc,bok
+	inc	b
+bok
+
+	pop	af
+	dec	a
+	jr	nz,l1	
+
+   			;now do attributes
+
+l0
+	ld	a,$20	;do 32 rows
+l1
+	push	af
+l2
+	ld	a,(hli)		;get a cell
+	ld	(de),a
+	inc	de
+	ld	(de),a
+	inc	de
+	ld	(bc),a
+	inc	bc
+	ld	(bc),a
+	inc	bc
+	ld	a,e
+	and	$1f
+	jr	nz,l2
+
+	ld	a,e
+	add	a,$20
+	ld	e,a
+	jr	nc,dok1
+	inc	d
+dok1
+	ld	a,c
+	add	a,$20
+	ld	c,a
+	jr	nc,bok1
+	inc	b
+bok1
+
+	pop	af
+	dec	a
+	jr	nz,l1	
+
+; no swap any vertical pairs makred by the vflip bit
+; and any horizontal pairs marker by the hflip bit
+; since the map software doesn't handle that
+
+; do hflips first
+
+	ld	hl,mapbuff+$800
+	ld	de,-$800
+l0
+	bit	5,(hl)
+	jr	z,l1
+	push	hl
+	add	hl,de	;hl = hl-$800
+	ld	a,(hli)	;swap them
+	ld	c,a
+	ld	a,(hld)
+	ld	(hli),a
+	ld	a,c
+	ld	(hld),a
+	pop	hl
+l1
+	inc	hl
+	inc	hl
+	ld	a,h
+	cp	$d8	;mapbuff+$1000
+	jr	nz,l0
+
+
+
+
+;now do vflips
+
+	ld	hl,mapbuff+$800
+	ld	de,-$800
+l0
+	bit	6,(hl)
+	jr	z,l1
+	push	hl
+	add	hl,de	;hl = hl-$800
+	push	hl
+	pop	bc
+	ld	a,c
+	add	a,$20
+	ld	c,a
+	ld	a,(hl)	;swap them
+	push	af
+	ld	a,(bc)
+	ld	(hl),a
+	pop	af
+	ld	(bc),a
+	nop
+	pop	hl
+l1
+	inc	hl
+	ld	a,l
+	and	$1f
+	jr	nz,l0
+	ld	a,$20
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+	cp	$d8	;mapbuff+$1000
+	jr	nz,l0
+
+
+	ld	a,(level)
+	cp	4
+	jr	nc,nowater
+
+; for water, replace the characters with a set of 16 
+
+	ld	hl,mapbuff
+	ld	de,$800
+	ld	b,0
+l0
+	ld	a,(hl)
+	cp	$4
+	jr	nc,l1	;not water
+	inc	b
+	ld	a,b
+	and	$0f	;16 different water characters
+	add	a,waterchar
+	ld	(hl),a
+l1
+	inc	hl
+	ld	a,h
+	cp	$d0	;done with map
+	jr	nz,l0
+
+; and clear that font block
+
+	ld	hl,$9800	;bank 2 characters 0-f
+	xor	a
+	ld	(vbk),a
+	ld	c,a
+l0
+	ld	(hli),a
+	dec	c
+	jr	nz,l0
+
+
+; and init the pointers to the flickering
+
+	ld	a,1
+	ld	(ripples),a
+	ld	a,$4c
+	ld	(ripples+1),a
+	ld	a,$39
+	ld	(ripples+2),a
+	ld	a,$df
+	ld	(ripples+3),a
+	ld	a,$a2
+	ld	(ripples+4),a
+	ld	a,$54
+	ld	(ripples+5),a
+	ld	a,$7b
+	ld	(ripples+6),a
+	ld	a,$e6
+	ld	(ripples+7),a
+
+	
+nowater	
+
+
+
+; and write to the screen
+
+	ld	hl,mapbuff+$400
+	ld	de,$9800
+	xor	a
+	ld	(vbk),a
+	ld	bc,$400
+	call	block_move
+	ld	hl,mapbuff+$c00
+	ld	de,$9800
+	ld	a,1
+	ld	(vbk),a
+	ld	bc,$400
+	call	block_move
+	xor	a
+	ld	(vbk),a
+	ret
+
+
+
+collisions
+		;get the three characters that might overlap the frog
+		;(will just be 2 characters if he's lined up with a cell
+
+	xor	a
+	ld	(loglane),a	;zero the flag that moves frog on log
+
+	ld	a,(dying)
+	and	a
+	ret	nz
+	call	calclane
+	ld	(froglane),a	;0 - $1f
+	sla	a
+	ld	(chary),a	;y character coordinate (0-$3f)
+;	ld	a,(truex)
+;	ld	b,a
+;	ld	a,(froglane)		
+;	dec	a
+;	ld	hl,xlane
+;	call	indexbya
+;	ld	a,(hl)		;x scroll for this lane
+;	add	a,b		;plus frog's true x
+;	ld	b,a
+;	ld	a,(screenx)
+;	add	a,b
+
+	
+	ld	a,(froglane)		
+;	dec	a
+	ld	hl,xlane
+	call	indexbya
+	ld	b,(hl)		;x scroll for this lane
+	ld	a,(screenx)
+	add	a,b
+	ld	b,a
+	ld	a,(frogx)
+	add	a,b
+	push	af
+	and	$f
+	ld	(xmod16),a
+	and	7
+	ld	(xmod8),a
+	pop	af
+	srl	a
+	srl	a
+	srl	a		; /8
+	ld	(charx),a
+	call	getchars
+	call	charcolls	
+
+
+	ret
+
+
+
+
+
+getchars	;get three characters under frog
+		; chary gives y row in map, but we have to adjust
+		;for screen y scroll and for which page of the
+		;map is on screen, so it's easier to just calculate
+		;the screen coordinate using scy and frogy		
+
+	ld	a,(frogy)
+	ld	b,a
+	ld	a,(screeny)
+	add	a,b
+	and	$f8	;effectively *8
+	ld	e,a
+	ld	d,0
+	sla	e	;*16
+	rl	d
+	sla	e	;*32
+	rl	d
+	ld	h,$98
+	ld	a,(charx)
+	ld	l,a
+	add	hl,de
+	ld	a,h
+	ld	(scrnptr+1),a
+	ld	(scrnptr+3),a
+	ld	(scrnptr+5),a
+	ld	a,l
+	ld	(scrnptr),a
+l0
+	ld	a,(stat)
+	and	2
+	jr	nz,l0
+	ld	a,(hl)
+	ld	(colchar),a
+	ld	a,l
+	and	$e0
+	ld	b,a
+	ld	a,l
+	inc	a
+	and	$1f
+	or	b
+	ld	l,a
+	ld	(scrnptr+2),a
+l0
+	ld	a,(stat)
+	and	2
+	jr	nz,l0
+	ld	a,(hl)
+	ld	(colchar+1),a
+	ld	a,l
+	and	$e0
+	ld	b,a
+	ld	a,l
+	inc	a
+	and	$1f
+	or	b
+	ld	l,a
+	ld	(scrnptr+4),a
+l0
+	ld	a,(stat)
+	and	2
+	jr	nz,l0
+	ld	a,(hl)
+	ld	(colchar+2),a
+	ret
+
+
+charcolls
+	     			;got all three
+				;time to check them
+				;first, check for cars, gators, otters
+
+	ld	a,(jumpcount)	;might be able to make this global
+	and	a
+	jp	nz,nocoll
+
+
+
+l0				;see if on checkpoint
+	ld	hl,checkchar
+	ld	a,(colchar0)
+	cp	(hl)
+	jr	c,l1
+	inc	hl
+	cp	(hl)
+	jp	c,docheck0
+l1
+l0				;see if on checkpoint
+	ld	hl,checkchar
+	ld	a,(colchar1)
+	cp	(hl)
+	jr	c,l1
+	inc	hl
+	cp	(hl)
+	jp	c,docheck1
+l1
+	
+l0				;see if on exit
+	ld	hl,doorchar
+	ld	a,(colchar0)
+	cp	(hl)
+	jr	c,l1
+	inc	hl
+	cp	(hl)
+	jp	c,foundexit
+l1
+l0				;see if on checkpoint
+	ld	hl,doorchar
+	ld	a,(colchar1)
+	cp	(hl)
+	jr	c,l1
+	inc	hl
+	cp	(hl)
+	jp	c,foundexit
+l1
+	
+
+
+
+	ld	hl,hitchar
+	ld	a,(colchar0)
+	cp	(hl)		;is first character a car
+	jr	c,check2	;no, so check next one
+	inc	hl
+	cp	(hl)		;still checking first one
+	jr	c,crush		;hit by car, gator, or otter
+	dec	hl
+check2
+	ld	a,(colchar1)
+	cp	(hl)
+	jr	c,check3
+	inc	hl
+	cp	(hl)
+	jr	c,crush
+	dec	hl
+check3
+	ld	a,(xmod8)
+	cp	3	;was 5		;need to check third character?
+	jr	c,dologs	;no, so check logs
+	ld	a,(colchar2)
+	cp	(hl)
+	jr	c,dologs
+	inc	hl
+	cp	(hl)
+	jr	nc,dologs
+crush
+	if devel
+	ld	a,(cnt1)
+	bit	buta,a
+	ret	nz
+	endif
+	ld	a,letterh
+	ld	(oamdevel),a
+
+	ld	a,DIEVAL
+	ld	(dying),a
+
+
+	ret
+dologs
+	call	centerchar	;get character under frog
+
+	ld	hl,floatchar
+	cp	(hl)
+	jr	c,nofloat
+	inc	hl
+	cp	(hl)
+	jr	nc,nofloat
+dofloat
+	ld	a,(froglane)
+	ld	(loglane),a	;mark lane where frog needs to move with log
+	call	floatfrog
+	ld	a,letterf
+	ld	(oamdevel),a
+	ret
+nofloat
+	ld	a,(colchar0)
+	ld	hl,drownchar
+	cp	(hl)
+	jr	c,nodrown
+	ld	a,(colchar1)	
+;	call	centerchar
+	cp	(hl)
+	jr	c,nodrown
+;	inc	hl
+;	cp	(hl)
+;	jr	nc,nodrown
+drown
+	if devel
+	ld	a,(cnt1)
+	bit	buta,a
+	ret	nz
+	endif
+	ld	a,letterd
+	ld	(oamdevel),a
+	ld	a,DIEVAL
+	ld	(dying),a
+	ret
+nodrown
+	call	centerchar
+	ld	hl,slipchar
+	cp	(hl)
+	jr	c,noslip
+	inc	hl
+	cp	(hl)
+	jr	nc,noslip
+	ld	a,$10
+	ld	(jumpcount),a
+	ld	a,jice
+	ld	(jtype),a
+	ret
+noslip
+	ld	a,(gluecount)
+	and	a
+	jr	nz,noglue	;already stuck
+	call	centerchar
+	ld	hl,gluechar
+	cp	(hl)
+	jr	c,noglue
+	inc	hl
+	cp	(hl)
+	jr	nc,noglue
+	ld	a,tglue
+	ld	(ttype),a
+	ld	a,jglue
+	ld	(jtype),a
+	ld	a,(frame)
+	and	7
+	add	a,1
+	ld	(gluecount),a
+	ret
+noglue
+	ld	a,(colchar0)
+	cp	exitchar
+	jr	z,foundexit
+	cp	exitchar+1
+	jr	z,foundexit
+	ld	a,(colchar1)
+	cp	exitchar
+	jr	z,foundexit
+	cp	exitchar+1
+	jr	z,foundexit
+
+nocoll
+
+	ld	a,lettern
+	ld	(oamdevel),a
+	ret
+
+foundexit
+l0
+	call	showtrans
+	ld	a,(level)
+	inc	a
+	cp	maxlevel
+	jr	nz,l1
+	xor	a
+l1
+	ld	(level),a
+
+l0
+	call	wait_vb
+	call	read_keys
+	ld	a,(cnt1)
+	and	start
+	cp	start
+	jr	z,l0
+
+
+	call	initlevel
+
+	ret
+
+	
+floatfrog	;move frog if his log is about to move
+
+	ld	hl,lanetime
+	ld	a,(froglane)
+	call	indexbya
+	ld	a,(hl)
+frogdx			;for entry from platform routines
+	cp	$ff
+	jr	z,negfrog
+	cp	1
+	ret	nz
+posfrog
+	ld	hl,truex
+	ld	a,(hl)
+	cp	xmax
+	ret	nc	
+	inc	(hl)
+	ret
+negfrog
+	ld	hl,truex
+	ld	a,(hl)
+	cp	xmin-$10
+	ret	z
+	ret	c
+	dec	(hl)
+	ret
+
+centerchar
+	ld	a,(xmod16)
+	cp	4
+;	jr	c,leftside
+	ld	a,(colchar1)	;check 2nd character
+	ld	(center),a
+	ret
+leftside
+	ld	a,(colchar0)
+	ld	(center),a
+	ret
+
+colorcycle
+	ret
+	ld	a,(frame)
+	and	$38
+;	sla	a
+;	sla	a
+;	sla	a
+	ld	hl,watertable
+	call	indexbya
+	ld	a,$98
+	ld	($ff68),a
+	ld	c,8
+l0
+	ld	a,(hli)
+	ld	($ff69),a
+	dec	c
+	jr	nz,l0
+	ret
+
+watertable
+	db	$c0,$e1,$a0,$e0,$c0,$e1,$c0,$e1
+	db	$c0,$e1,$c0,$e1,$ab,$fa,$c0,$e1
+	db	$c0,$e1,$c0,$e1,$c0,$e1,$c0,$e1
+	db	$c0,$e1,$c0,$e1,$c0,$e1,$ab,$fa
+	db	$c0,$e1,$ff,$fb,$c0,$e1,$c0,$e1
+	db	$c0,$e1,$c0,$e1,$c0,$e1,$a0,$e0
+	db	$c0,$e1,$c0,$e1,$ab,$fa,$c0,$e1
+	db	$c0,$e1,$c0,$e1,$c0,$e1,$ff,$fb
+
+;colorcycle
+	ld	a,(frame)
+	and	$3
+	ret	nz
+	ld	a,(frame)
+	srl	a
+	srl	a
+;	srl	a
+	and	$06
+	ld	hl,watertable
+	call	indexbya
+	ld	a,$98
+	ld	($ff68),a
+	ld	c,8
+l0
+	ld	a,(hli)
+	ld	($ff69),a
+	dec	c
+	jr	nz,l0
+	ret
+
+
+;watertable
+	db	$a0,$e0,$40,$e1,$e0,$f9,$80,$fa
+	db	$a0,$e0,$40,$e1,$e0,$f9,$80,$fa
+
+;animate		;test
+	ld	a,(frame)
+	and	$f
+	ret	nz
+	ld	a,(lilyframe)
+	inc	a
+	and	3
+	ld	(lilyframe),a
+	swap	a	;*16
+	ld	e,a
+	xor	a
+	ld	d,a
+	ld	hl,lilyfont
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+	ld	a,$40
+	ld	(dmadest+1),a
+	ld	a,$90
+	ld	(dmadest),a
+	ld	a,$3
+	ld	(dmactrl),a
+	ret	
+	
+animate
+	ld	a,(dmaflag)
+	and	a
+	ret	z
+	push	af
+	ld	a,(vbk)
+	push	af	
+	xor	a
+	ld	(vbk),a
+	ld	a,animbank
+	call	newbank
+	pop	af
+	ld	(vbk),a
+	pop	af
+	ld	(dmactrl),a
+	call	oldbank
+	xor	a
+	ld	(dmaflag),a
+	ret
+
+	ld	a,(level)
+	cp	6
+	ret	nz
+	ld	a,$93
+	ld	(dmadest),a
+	ld	a,$10
+	ld	(dmadest+1),a
+	ld	hl,dmabuff
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+	ld	a,2
+	ld	(dmactrl),a
+	ret
+
+world1code
+	call	animcat
+	ret
+
+world3code
+	call	animcars
+	ret
+
+world2code
+	call	dorocks
+	ret
+
+
+turtlecheck	       ;see if on sinking turtle
+	ld	a,(center)
+	cp	w0turtle
+	ret	c
+	cp	w0turtle+4
+	ret	nc
+	ld	a,(tframe0)
+	cp	w0drown
+	ret	c
+	jp	drown
+
+world0code
+	call	doripples
+	ld	a,(loglane)
+	and	a
+	call	nz,turtlecheck
+	ld	a,(frame)
+	and	$3f
+	cp	1
+	jr	z,turtles1	;swim, sink
+	cp	7
+	jr	z,turtles2	;swim
+	ret
+
+turtles1
+	ld	a,(tcount0)
+	inc	a
+	ld	(tcount0),a
+	and	$1f
+	ld	hl,turtleframes
+	call	indexbya
+	ld	a,(hl)
+	ld	(tframe0),a	;save for float\drown test
+	ld	de,turtleloc0
+	ld	hl,0+turtles	;font for the frames
+	jr	setupturtle
+turtles2
+	ld	a,(tcount1)
+	inc	a
+	ld	(tcount1),a
+	and	$3
+	ld	hl,turtleframes
+	call	indexbya
+	ld	a,(hl)
+	ld	de,turtleloc1
+	ld	hl,0+turtles
+setupturtle
+			;a = frame #
+			;de = location
+	push	af
+	ld	a,d
+	ld	(dmadest),a
+	ld	a,e
+	ld	(dmadest+1),a
+	pop	af
+	swap	a
+	ld	e,a
+	xor	a
+	ld	d,a
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+	ld	a,3
+	ld	(dmaflag),a
+	ret
+	
+turtleframes
+	db	0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1
+	db	3,4,5,4,6,7,8,7,6,7,8,7
+	db	9,$a,$b,$a
+
+doripples
+	xor	a
+	ld	(vbk),a
+	ld	hl,ripples
+	ld	a,(frame)
+	and	$f
+	ret	nz
+	ld	a,(frame)
+	sla	a
+	sla	a
+	sla	a
+	sla	a
+	and	7
+	call	indexbya
+	ld	b,1
+l0
+	ld	a,(hl)
+	call	clearripple
+	ld	a,(hl)
+	add	a,31
+	ld	(hli),a
+	call	newripple
+	dec	b
+	jr	nz,l0
+	ret
+
+clearripple
+	ld	e,a
+	ld	d,$8f	;ripple font is at $8f00 
+	xor	a
+	call	screenwriteb1
+	ret
+newripple
+	ld	e,a
+	ld	d,$8f	;ripple font is at $8f00
+	ld	a,(ripplecnt)
+	inc	a
+l0
+	cp	14
+	jr	c,l1
+	xor	a
+l1
+	ld	(ripplecnt),a
+	push	hl
+	ld	hl,ripplebits
+	call	indexbya
+	ld	a,(hl)
+	pop	hl
+	call	screenwriteb1
+	ret
+
+ripplebits
+	db	$03,$0c,$c0,$30,$cc,$f0,$30,$c0
+;	db	$03,$01,$C0,$06,$40,$0e,$a0,$0f
+	db	$14,$0f,$20,$c1,$80,$09,$11,$02
+
+screenwriteb1
+	push	af
+l0
+	ld	a,(STAT)
+	bit	1,a
+	jr	nz,l0
+	pop	af
+	ld	(de),a
+	ret
+
+initgems
+	xor	a
+	ld	(gemvalue),a
+	ld	hl,gemdata
+	ld	c,numgems*4
+	call	zerohlc
+	xor	a
+	ld	(gems),a
+	ld	a,(level)
+	sla	a
+	ld	hl,gemtabs
+	call 	indexbya
+	call	stuffhl
+	ld	de,gemdata
+l0
+	ld	a,(hli)
+	cp	$ff
+	ret	z	;done
+	push	af
+	ld	a,(gems)
+	inc	a
+	ld	(gems),a
+	ld	a,1
+	ld	(de),a	;status of this gem  1 = active
+	inc	de
+	pop	af
+			;this is the x cell coordinate
+	swap	a
+	ld	(de),a	;cell x *16 = pixel coordinate
+	inc	de
+	ld	a,(hli)
+	inc	a	;y cell (add 1 to get desired location)
+	ld	b,a
+	swap	a
+	and	$f0
+	ld	(de),a
+	inc	de
+	ld	a,b
+	swap	a
+	and	1
+	ld	(de),a
+	inc	de
+	jr	l0
+
+
+drawgems
+	call	getoamptr
+	ld	hl,gemdata
+	ld	a,numgems
+	ld	(temp0),a
+gemloop
+	ld	a,(hli)
+	and	a
+	jr	z,nextgem3
+	ld	a,(hli)
+	ld	(gemx),a
+	ld	a,(hli)
+	ld	(gemy),a
+	ld	a,(hli)
+	ld	(gemy+1),a
+	call	drawgem
+	jr	nc,nextgem	;didn't draw, so no need for collision check
+	call	gemcol
+	jr	nextgem
+nextgem3
+	inc	hl
+	inc	hl
+	inc	hl
+nextgem
+	ld	a,(temp0)
+	dec	a
+	ld	(temp0),a
+	jr	nz,gemloop
+	call	saveoamptr
+	ret
+
+drawgem
+	ld	a,(screeny+1)
+	ld	c,a
+	ld	a,(screeny)
+	ld	b,a
+	ld	a,(gemy)
+	sub	b
+	ld	b,a	;save for sprite position
+	ld	a,(gemy+1)
+	sbc	a,c
+	and	a
+	jr	nz,nodraw
+	ld	a,b
+	cp	$a0
+	jr	nc,nodraw
+	ld	b,a
+	add	a,$4	;center it in cell
+	ld	(de),a	;oam y position
+	ld	(objy),a	;save for collision test
+	inc	de
+	ld	a,(screenx)
+	ld	c,a
+	ld	a,(gemx)
+	sub	c
+	add	a,$b	;center it?
+	ld	(objx),a
+	ld	(de),a
+	inc	de
+	ld	a,gemframe
+	ld	b,a
+	ld	a,(frame)
+	swap	a
+	and	3
+	add	a,b
+	ld	(de),a
+	inc	de
+	ld	a,gempal
+	ld	(de),a
+	inc	de
+	scf
+	ret
+nodraw
+	xor	a	 ;clear carry
+	ret
+
+gemcol
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$18
+	cp	$10
+	ret	nc
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$18
+	cp	$10
+	ret	nc
+	ld	a,(gems)
+	dec	a
+	ld	(gems),a
+	ld	a,(gemvalue)
+	inc	a
+	ld	(gemvalue),a
+	ld	b,a
+	ld	a,(scorebuf)
+	add	a,b
+	ld	(scorebuf),a
+	push	hl	;hl points to next gem data
+	dec	l
+	dec	l
+	dec	l
+	dec	l
+	xor	a
+	ld	(hl),a
+	pop	hl
+	ret
+
+clroamptr
+	call	getoamptr
+l0
+	ld	a,e
+	cp	lastoam
+	ret	z
+	xor	a
+	ld	(de),a
+	inc	de
+	jr	l0
+	
+whichscreen		;sets screeny+1 
+	push	hl
+	ld	hl,screeny
+	ld	a,(truey)
+	sub	(hl)
+	inc	hl
+	ld	a,(truey+1)
+	jr	nc,syok
+	dec	a
+syok
+	ld	(screeny+1),a
+	pop	hl
+	ret
+
+	if	0
+
+initstats
+
+	ld	a,$80
+	ld	(gemnumloc),a
+	ld	a,$10
+	ld	(gemnumloc+1),a
+	ld	a,(digits)
+	ld	(gemnumloc+2),a
+	ld	a,1
+	ld	(gemnumloc+3),a
+	ret
+
+dostats
+
+	ld	a,(gems)
+	add	a,digits
+	ld	(gemnumloc+2),a
+	ret
+
+	endif
+
+dodying
+	ld	a,(dying)
+	bit	7,a
+	jr	z,posdie	;delay over, bring him back to checkpoint
+      	dec	a
+	ld	(dying),a
+	ret
+
+posdie
+	ld	a,1
+	ld	(temp0),a	;set = 0 if back at x coordinate
+	ld	a,(frame)
+	and	1
+	ret	nz
+	ld	a,0
+	ld	(frogframe),a
+	ld	a,(truex)
+	ld	hl,startingx
+	cp	(hl)
+	jr	z,checky
+	jr	c,incfx
+	dec	a
+	dec	a
+incfx
+	inc	a
+	ld	(truex),a
+	jr	checky1	;still dying
+checky
+	xor	a
+	ld	(temp0),a
+checky1
+	ld	a,(truey+1)
+	ld	b,a
+	ld	a,(startingy+1)
+	cp	b		;both = 0 or both = 1?
+	jr	z,checky2	;yes, so just deal with lower 8 bits
+       	and	a		;if <>, then if startingy = 1, need to
+				;inc truey, else need to dec it
+	jr	nz,incfy
+	jr	decfy
+
+checky2
+	ld	a,(truey)
+	ld	hl,startingy
+	cp	(hl)
+	jr	z,checky3
+	jr	nc,decfy
+	jr	c,incfy
+incfy
+	call	botstrip
+	ld	a,(truey)
+	inc	a
+	ld	(truey),a
+	ret	nz
+	ld	a,(truey+1)
+	inc	a
+	ld	(truey+1),a
+	ret
+decfy
+	call	topstrip
+	ld	a,(truey)
+	dec	a
+	ld	(truey),a
+	cp	$ff
+	ret	nz
+	ld	a,(truey+1)
+	dec	a
+	ld	(truey+1),a
+	ret
+checky3
+	ld	a,(temp0)
+	and	a
+	jr	z,dieover
+	ret
+
+
+dieover
+	xor	a
+	ld	(dying),a
+	call	initbar
+	call	calclane
+	ld	(lowy),a
+	ld	a,(menleft)
+	and	a
+	ret	z
+	dec	a
+	ld	(menleft),a
+	call	drawmen
+	ret
+	
+
+docheck0		;do new checkpoint
+	call	startvals
+	call	updatecheck
+	ret
+docheck1
+	call	startvals
+	call	updatecheck
+	ret
+startvals
+	ld	a,(truex)
+;	and	$f0
+	ld	(startingx),a
+	ld	a,(truey)
+	and	$f0
+	ld	(startingy),a
+	ld	a,(truey+1)
+	ld	(startingy+1),a
+	ret
+
+dorocks
+
+	ld	a,(frame)
+	and	$1f
+	ret	nz
+	ld	a,(frame)
+	and	$60		;4 frames, so need two bits
+	ld	e,a
+	ld	a,$90	   ;rock starts at $9040
+	ld	(dmadest),a
+	ld	a,$40
+	ld	(dmadest+1),a
+	ld	hl,0+rockanim
+	ld	d,0
+			;de already *32
+			;need to make it * 128
+	sla	e
+	rl	d	
+	sla	e
+	rl	d	
+
+	add	hl,de
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+
+	ld	a,7
+	ld	(dmaflag),a
+	ret
+
+showtrans
+	call	lcd_off
+	ld	a,levtransbank
+	call	forcebank
+	call	resetscreen
+	call	0+drawlevtrans
+	ld	a,1
+	ld	(lcdc),a	;no sprites
+	call	lcd_on
+l0
+	call	wait_vb
+	call	read_keys
+	call	coldstart
+	ld	a,(trg1)
+	and	START
+	jr	z,l0
+	ret
+
+wait_vb
+l0
+	ld	a,(ly)
+	cp	144
+	jr	c,l0
+l1
+	ld	a,(ly)
+	cp	144
+	jr	nc,l1
+	ret
+
+animcars			;scroll catwalk background
+	ld	hl,0+carsanim	;start of font data
+	ld	a,(screenx)
+	srl	a
+	and	$f
+	ld	e,a
+	xor	a
+	ld	d,a
+	swap	e		;*16
+	sla	e
+	rl	d		;*32
+	sla	e
+	rl	d		;*64
+	add	hl,de
+	ld	a,animbank
+	call	forcebank
+	call	getystrip
+	ld	a,1
+	call	forcebank
+	ld	hl,dmabuff
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+	xor	a
+	ld	(dmadest+1),a
+	ld	a,$90
+	ld	(dmadest),a
+	ld	a,3
+	ld	(dmaflag),a
+	ret
+
+
+
+animcat			;scroll catwalk background
+	ld	hl,0+catanim	;start of font data
+	ld	a,(screenx)
+	srl	a
+	and	$f
+	ld	e,a
+	xor	a
+	ld	d,a
+	swap	e		;*16
+	sla	e
+	rl	d		;*32
+	sla	e
+	rl	d		;*64
+	add	hl,de
+	ld	a,animbank
+	call	forcebank
+	call	getystrip
+	ld	a,1
+	call	forcebank
+	ld	hl,dmabuff
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+	xor	a
+	ld	(dmadest+1),a
+	ld	a,$90
+	ld	(dmadest),a
+	ld	a,3
+	ld	(dmaflag),a
+	ret
+
+getystrip		;put font definition in buffer
+			;adjusted for y scroll
+
+			;hl points to cell definition l = 0,$40,$80, or $c0
+			;screeny gets index into first character
+
+	ld	de,dmabuff
+	ld	b,l
+
+	ld	a,(screeny)
+	xor	$ff
+	and	$1e		;half the screen scroll value, but
+				;need to index words so this is
+				;the same as /2 then *2
+	or	b
+	ld	l,a
+	call	onepair
+				;first pair done
+
+	ld	a,b
+	or	$20
+	ld	b,a
+	ld	a,l
+	or	b
+	ld	l,a
+	call	onepair
+	ret
+onepair
+	ld	c,$20		;counter
+l0
+	ld	a,(hl)
+	ld	(de),a
+	inc	de
+	ld	a,l
+	inc	a
+	and	$1f
+	or	b
+	ld	l,a
+	dec	c
+	jr	nz,l0
+	ret
+
+; for each sprite, move the x and y data into it's block, 
+; set the status byte, and jump to the init routine
+
+initsprites
+	ld	hl,spvars
+	ld	c,0
+	call	zerohlc
+	ld	a,(level)
+	sla	a
+	ld	hl,spritetabs
+	call 	indexbya
+	call	stuffhl
+	ld	de,spvars
+l0
+	ld	a,(hli)	;x position
+	and	a
+	ret	z	;all done
+	push	de
+	push	af	;save x location
+	ld	a,1
+	ld	(de),a	;status
+	inc	de
+	inc	de
+	inc	de	;skip brain pointer
+	pop	af
+	ld	(de),a
+	inc	de
+	ld	a,(hli)
+	ld	(de),a	;ylo
+	inc	de
+	ld	a,(hli)
+	ld	(de),a	;yhi
+	ld	a,(hli)
+	ld	(spritevar0),a
+	ld	a,(hli)
+	ld	(spritevar1),a ;fro general passed parameter
+	ld	a,(hli)	;brainlo
+	ld	c,a
+	ld	a,(hli)	;brainhi
+	push	hl
+	ld	h,a
+	ld	l,c
+			;hl = init routine
+	call	calljump
+	pop	hl
+	pop	de
+	ld	a,$10
+	add	a,e
+	ld	e,a
+	jr	l0
+
+calljump
+	jp	(hl)
+
+getoamptr
+	ld	a,(oamptr)
+	ld	d,a
+	ld	a,(oamptr+1)
+	ld	e,a
+	ret
+saveoamptr
+	ld	a,d
+	ld	(oamptr),a
+	ld	a,e
+	ld	(oamptr+1),a
+	ret
+
+dosprites
+	ld	a,lettern
+	ld	(oamdevel),a
+
+	ld	hl,spvars
+l0
+	ld	a,(hl)	;status byte
+	and	a
+	jr	z,nextspr
+	push	hl
+	ld	a,h
+	ld	(saveptr+1),a
+	ld	a,l
+	ld	(saveptr),a
+	add	a,1
+	ld	l,a
+	call	stuffhl
+	call	calljump	;go to brain routine
+	pop	hl
+nextspr
+	ld	a,l
+	add	a,$10
+	ld	l,a
+	jr	nz,l0		;up to 16?
+	ret
+
+drawsprite
+	xor	a
+	ld	(drewit),a
+	call	getrealxy
+	ret	nc		;if no carry, then it's off screen
+	ld	a,1
+	ld	(drewit),a
+	call	getoamptr
+	push	de
+	pop	hl
+	ld	a,(spritewidth)
+	ld	c,a		;counter
+	ld	a,(spritechar)
+	ld	d,a		;first character
+	
+	ld	a,(spritedx)
+	bit	7,a
+	jr	nz,flipsprite	;draw xflipped version
+l0
+	ld	a,l
+	cp	oamend-oamshad
+	jr	z,sprover		;filled oam
+l1
+	ld	a,(spritey)
+	ld	(hli),a
+	ld	a,(spritex)
+	ld	(hli),a
+	ld	a,d
+	ld	(hli),a
+	inc	d
+	ld	a,(spriteatt)
+	ld	(hli),a
+
+	ld	a,(spritey)
+	add	a,8
+	ld	(hli),a
+	ld	a,(spritex)
+	ld	(hli),a
+	add	a,8
+	ld	(spritex),a
+	ld	a,d
+	ld	(hli),a
+	inc	d
+	ld	a,(spriteatt)
+	ld	(hli),a
+	dec	c
+	jr	nz,l0
+sprover
+	push	hl
+	pop	de
+	jp	saveoamptr
+
+flipsprite
+	ld	a,(spritewidth)
+	dec	a
+	sla	a
+	sla	a
+	sla	a
+	ld	e,a
+	ld	a,(spritex)
+	add	a,e
+	ld	(spritex),a
+	ld	a,(spriteatt)
+	or	$20	;hflip
+	ld	(spriteatt),a	
+l0
+	ld	a,l
+	cp	oamend-oamshad
+	jr	z,sprover1		;filled oam
+l1
+	ld	a,(spritey)
+	ld	(hli),a
+	ld	a,(spritex)
+	ld	(hli),a
+	ld	a,d
+	ld	(hli),a
+	inc	d
+	ld	a,(spriteatt)
+	ld	(hli),a
+
+	ld	a,(spritey)
+	add	a,8
+	ld	(hli),a
+	ld	a,(spritex)
+	ld	(hli),a
+	sub	8
+	ld	(spritex),a
+	ld	a,d
+	ld	(hli),a
+	inc	d
+	ld	a,(spriteatt)
+	ld	(hli),a
+	dec	c
+	jr	nz,l0
+sprover1
+	push	hl
+	pop	de
+	jp	saveoamptr
+
+
+
+
+getrealxy
+	ld	a,(screenx)
+	ld	c,a
+	ld	a,(spritex)
+	sub	c
+	add	a,8	;center it?
+	ld	(spritex),a
+   	ld	(objx),a	;save for collision test
+	ld	a,(screeny+1)
+	ld	c,a
+	ld	a,(screeny)
+	ld	b,a
+	ld	a,(spritey)
+	sub	b
+	ld	b,a	;save for sprite position
+	ld	a,(spritey+1)
+	sbc	a,c
+	and	a
+	jr	nz,nodraw1
+	ld	a,b
+	cp	$a0
+	jr	nc,nodraw1
+;	ld	b,a
+;	add	a,$4	;center it in cell
+	ld	(spritey),a	;oam y position
+	ld	(objy),a
+	scf
+	ret
+nodraw1
+	xor	a
+	ret
+
+updatecheck
+	ld	a,(scrnptr+1)
+	ld	h,a
+	ld	a,(scrnptr)
+	and	$fe	;keep on cell boundary
+	ld	l,a
+	ld	a,checkoff
+	call	writecell ;update screen
+	call	truemap		
+	ld	a,checkoff
+	call	writemcell	;and map in mapbuff
+	ret
+
+writecell
+	call	scwrite
+	add	a,2
+	inc	l
+	call	scwrite
+	dec	a
+	push	af
+	ld	a,l
+	add	a,$1f
+	ld	l,a
+	pop	af
+	call	scwrite
+	add	a,2
+	inc	l
+	call	scwrite
+	ret
+
+writemcell
+	ld	(hli),a
+	add	a,2
+	ld	(hl),a
+	dec	a
+	push	af
+	ld	a,l
+	add	a,$1f
+	ld	l,a
+	pop	af
+	ld	(hli),a
+	add	a,2
+	ld	(hl),a
+	ret
+
+
+
+scwrite
+	push	af
+l0
+	ld	a,(stat)
+	bit	2,a
+	jr	nz,l0
+	pop	af
+	ld	(hl),a
+	ret
+
+truemap		;get mapbuff location for truex, truey location
+	ld	hl,mapbuff
+	ld	a,(truex)
+	srl	a
+	srl	a
+	srl	a
+	ld	l,a
+	ld	a,(truey)
+	and	$f0
+	ld	e,a
+	ld	a,(truey+1)
+	ld	d,a
+	sla	e
+	rl	d
+	sla	e
+	rl	d
+	add	hl,de
+	ret
+
+initstat
+	ld	hl,statmap
+	ld	de,$9c00
+	ld	c,$80
+	call	movehldec
+	ld	a,1
+	ld	(vbk),a
+	ld	hl,statmap+$80
+	ld	de,$9c00
+	ld	c,$80
+l0
+	ld	a,(hli)
+	or	$88	;bank2 character set
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l0
+	
+	ld	hl,statfont
+	ld	de,$9000
+	ld	bc,$800
+	call	movehldebc
+	xor	a
+	ld	(vbk),a
+
+	ld	a,$80
+	ld	(wy),a
+	ld	a,7
+	ld	(wx),a
+initbar
+	ld	hl,timebuff	;restore timer bar
+	ld	a,TIMECHAR
+	ld	b,8
+l0
+	ld	(hli),a
+	dec	b
+	jr nz,l0
+	xor	a
+	ld	(timeptr),a
+	ret
+
+dobar
+	ld	a,(dying)
+	and	a
+	ret	nz		;jr	nz,barok
+	ld	a,(frame)
+	and	$3f	       ;every 64 frames
+	jr	nz,barok
+	ld	hl,timebuff     ;screen location
+	ld	a,(timeptr)    ;offset to current character
+	ld	b,a		;save it
+	add	a,l
+	ld	l,a
+	ld	a,(hl)
+	inc	a
+	ld	(hl),a
+	cp	TIMECHAR+8 ;last tick for this character
+	jr	nz,barok	;no
+	ld	a,b		;get pointer back
+	inc	a
+	ld	(timeptr),a
+	cp	8	;out of time?
+	jr	nz,barok
+	ld	a,dieval
+;	ld	(dying),a
+	call	initbar
+	if	audio
+	ld	a,car_s
+	call	gsetsnd
+	endif
+barok
+	ret
+	
+fudgetestr			;see if frog is out of x alignment
+				;if so, and jumping on non-scrolling
+				;lane, then adjust length of jump
+	ld	a,(loglane)
+	and	a
+	jr	nz,nofudge
+	ld	a,(truex)
+	and	$f
+	ld	b,a
+	ld	a,$10
+	sub	b
+	ret
+
+fudgetestl			;see if frog is out of x alignment
+				;if so, and jumping on non-scrolling
+				;lane, then adjust length of jump
+	ld	a,(loglane)
+	and	a
+	jr	nz,nofudge
+	ld	a,(truex)
+	and	$f
+	jr	z,nofudge	;aligned
+				;see whether to make a short jump
+				;or a long one
+;	cp	4
+;	ret	nc		;if far enough right, just align with this cell
+;	add	a,$10		;else jump to next cell
+	ret
+
+
+nofudge
+	ld	a,$10
+	ret
+
+
+		
+addten
+	ld	bc,$0001
+addscore			;add bc to score (padded with one zero)
+	ld	a,(score)
+	ld	d,a		;save this digit to check for extra man
+	ld	a,c
+	and	$f
+	ld	hl,score+3
+	add	a,(hl)
+	ld	(hl),a		;sta score+5
+	ld	a,c
+	swap	a
+	and	$f
+	dec	hl
+	add	a,(hl)
+	ld	(hl),a		;sta score+4
+	ld	a,b
+	and	$f
+	dec	hl
+	add	a,(hl)
+	ld	(hl),a		;sta score+3
+	ld	a,b
+	swap	a
+	and	$f
+	dec	hl
+	add	a,(hl)
+	ld	(hl),a		;sta score+2
+adscor3
+	ld	b,3		;ripple carry
+	ld	hl,score+3
+adscor1	ld	a,(hl)		;lda score,x
+	cp	10
+	jr	c,adscor2
+	sub	10
+	ld	(hl),a		;sta score,x
+	dec	hl
+	inc	(hl)		;inc score-1,x
+	inc	hl
+adscor2	dec	hl
+	dec	b
+	jr	nz,adscor1
+				;test for wrap
+	ld	a,(score)
+	cp	d		;highest digit the same as before?
+	ret	z		;yup
+	cp	10
+	jr	nc,maxscore
+				;bonus every 10,000
+	ld	hl,menleft
+	inc	(hl)
+	call 	drawmen
+	ret	
+maxscore
+	ld	a,9
+	ld	(score),a
+	ld	(score+1),a
+	ld	(score+2),a
+	ld	(score+3),a
+	ret
+
+drawmen
+	ld	de,menloc
+	ld	a,(menleft)
+			;update status area with men-left icons
+	ld	hl,STAT		;de = desired location a = menleft
+	ld	c,5
+	and	a
+	jr	z,nomen
+	ld	b,a
+	ld	a,MENCHAR
+	di
+l0
+	bit	1,(hl)
+	jr	nz,l0
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	z,menout
+	dec	b
+	jr	nz,l0
+nomen			;blank out rest of this area
+	xor	a	;space character
+l1
+	bit	1,(hl)
+	jr	nz,l1
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l1
+menout
+	ei
+	ret
+
+
+
+updatestatus
+	ld	hl,timebuff
+	ld	de,timeloc
+	ld	b,8
+	xor	a
+	ld	(vbk),a
+l0
+	ld	a,(stat)
+	bit	2,a
+	jr	nz,l0
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec	b
+	jr	nz,l0
+drawscore
+	ld	de,scoreloc
+	ld	b,0
+	ld	c,b
+	ld	hl,SCORE  
+FILTX2	ld	a,(hli)    
+	and	a         
+	jr	nz,FLTX2A 
+	bit	0,c       
+	jr	z,pblnk
+FLTX2A	add	a,ZEROCHAR
+	set	0,c       
+	jr	fltx2b
+pblnk	ld	a,0	;blank
+FLTX2B	ld	(de),a   
+	inc	de        
+	inc	b         
+	ld 	a,b       
+	cp 	3  ;5    
+	jr 	c,FILTX2  
+	set	0,c       
+	cp 	3  ;5    
+	jr 	z,FILTX2  
+nscrdsp		   
+	ret
+
+hoppoint
+	dec	(hl)	;set new lowy value
+	call	addten
+	ret
+calclane
+	ld	a,(truey+1)
+	and	1
+	swap	a
+	ld	b,a
+	ld	a,(truey)	;lane is y/16
+	and	$f0
+	swap	a
+	or	b
+	ret
+

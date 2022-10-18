@@ -1,0 +1,209 @@
+
+; *****************
+; *** ROM Start ***
+; *****************
+
+
+	thisbank -1		;bank 0
+	otherbank 1
+
+	org	$150		
+g				;cold start
+	cp	$11
+	jr	z,iscgb
+	ld	a,monobank
+	call	forcebank
+	jp	0+monocode
+iscgb
+	ld      sp,$DFF0	;Stack  (leave $10 for flags)
+
+	xor	a
+	ld	(firststart),a	;totally cold start
+	ld	(titleflag),a
+				;Disable interrupts
+	ld	($ffff),a
+
+	ld	(saveflag),a	;default is 0
+	ld	(saveplayer),a
+	ld	a,%00110000	;Disable keypad
+	ld	($ff00),a
+	ld	a,%00000001		;Switch to double-speed mode
+	ld	($ff4d),a
+	stop
+
+	call	ramtest		;see if ram backup ram is clear
+
+
+restart
+	ld      sp,$DFF0	;Stack  (leave $10 for flags)
+	call	Init_MBC
+	call    lcd_off		;Stop LCD
+	ld	hl,$FF80	;Clear RAM internal to DMG chip
+	ld	c,$7F		;Clear object buffer in work RAM
+	call	zero_ram_c
+	ld	hl,$C000	;Clear work RAM (includes object buffer)
+	ld	bc,$1F00	;Don't clear top 16 bytes (stack)
+	call	zero_ram_bc
+	ld	a,1
+	call	forcebank
+	ld	hl,$8000	;clear all video ram
+	ld	bc,$2000
+	call	zero_ram_bc
+	call    dmaset		;Transfer dma_to_OAM program to DMG chip RAM
+
+;	ld	a,(saveplayer)
+;	swap	a		;*16
+;	sla	a
+;	sla	a
+;	ld	hl,playerstats
+;	call	indexbya
+;	ld	a,(hl)
+	ld	a,(saveflag)
+	ld	(soundflag),a	
+
+;Setup interrupts
+	xor	a		;Cancel pending interrupts
+	ld	(.IF),a		;This prevents an immediate "keyboard" interrupt
+
+	ld	a,%00010011	;Key, LCDC, V-Blank
+	ld      (IE),a		;Interrupt Enable
+
+	ld	a,$d4
+	ld	(random),a
+	ei                      ;Enable interrupts
+
+	xor	a
+	ld	(world),a
+	xor	a
+;	ld	a,12
+	ld	(level),a
+
+;	jp	wongame
+
+
+	if	quick
+	else
+
+;show the logo
+
+titleloop
+	ld	a,hilogobank
+	call	gethiart
+	ld	a,1
+	ld	(LCDC),a
+	call	lcd_on
+
+	ld	a,(titleflag)
+	and	a
+	jr	nz,beenhere	;not first time, so need to check for
+				;start
+	ld	a,onesec*2
+	call	logodelay1	;no button test
+	jr	logodone
+
+beenhere
+	call	wait_vb
+	call	read_keys
+	ld	a,(cnt1)
+	cp	$f
+	jr	z,beenhere	;hold during cold key press
+
+	ld	a,onesec*2
+	call	logodelay
+	and	a
+	jr	nz,skiplegal
+
+logodone
+	call	lcd_off
+	ld	a,legalbank
+	call	gethiart
+	ld	a,1
+	ld	(LCDC),a
+	call	lcd_on
+
+	ld	a,onesec*2
+	call	logodelay
+	and	a
+	jr	nz,skiplegal
+
+
+	call	lcd_off
+	ld	a,hititlebank
+	call	gethiart
+	ld	a,1
+	ld	(LCDC),a
+	call	lcd_on
+	ld	a,onesec*2
+	call	logodelay
+	and	a
+	jr	nz,skiplegal
+
+	ld	a,1
+	ld	(titleflag),a
+
+	call	lcd_off
+	ld	a,cred1bank
+	call	gethiart
+	ld	a,1
+	ld	(LCDC),a
+	call	lcd_on
+	ld	a,onesec*2
+	call	logodelay
+	and	a
+	jr	nz,skiplegal
+
+	call	lcd_off
+	ld	a,cred2bank
+	call	gethiart
+	ld	a,1
+	ld	(LCDC),a
+	call	lcd_on
+	ld	a,onesec*2
+	call	logodelay
+	and	a
+	jr	nz,skiplegal
+
+	call	showhigh1
+
+	ld	a,onesec*2
+	call	logodelay
+	and	a
+	jr	nz,skiplegal
+
+	call	lcd_off
+
+	jp	titleloop
+
+	endif	;skipped in quick mode
+
+
+skiplegal
+	call	dostartsound
+getnameagain
+
+	ld	hl,fudge
+	ld	a,$ff
+	ld	c,0
+l0
+	ld	(hli),a
+	inc	c
+	jr	nz,l0
+
+
+
+	call	getname
+revisit			;go back to menu after a visit
+	call	domenu
+
+;	call	initplayer
+
+	ld	a,1
+	ld	(showtimes),a
+
+
+	call	newgame
+	call	initlevel
+
+	jp	main
+
+

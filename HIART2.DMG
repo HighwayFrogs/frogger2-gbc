@@ -1,0 +1,47 @@
+	thisbank	$30
+	org	$4000
+cred1bank	equ	$30
+cred1pal		includeraw	grfx\cred1pal.raw
+cred1map		includeraw	grfx\cred1map.raw
+			includeraw	grfx\cred1atr.raw
+			includeraw	grfx\cred1til.raw
+
+	thisbank	$2f
+	org	$4000
+cred2bank	equ	$2f
+cred2pal		includeraw	grfx\cred2pal.raw
+cred2map		includeraw	grfx\cred2map.raw
+			includeraw	grfx\cred2atr.raw
+			includeraw	grfx\cred2til.raw
+
+	thisbank	$2e
+	org	$4000
+optnbank	equ	$2e
+optnpal		includeraw	grfx\optnpal.raw
+optnmap		includeraw	grfx\optnmap.raw
+			includeraw	grfx\optnatr.raw
+			includeraw	grfx\optntil.raw
+
+	thisbank	$2d
+	org	$4000
+goptnbank	equ	$2d
+goptnpal		includeraw	grfx\goptnpal.raw
+goptnmap		includeraw	grfx\goptnmap.raw
+		includeraw	grfx\goptnatr.raw
+		includeraw	grfx\goptntil.raw
+
+
+	thisbank	$2c
+	org	$4000
+wongbank	equ	$2c
+wongpal		includeraw	grfx\wongpal.raw
+wongmap		includeraw	grfx\wongmap.raw
+			includeraw	grfx\wongatr.raw
+			includeraw	grfx\wongtil.raw
+
+
+
+
+	dumpsym	hiart2
+
+

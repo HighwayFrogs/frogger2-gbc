@@ -1,0 +1,15 @@
+
+f2subs.dmg(5909): Operand evaluation failed: unknown symbol found
+        call    0+showrecords
+6A80            ; Bytes remaining:
+0175            l0      equ     0+$4000-endb0           ;bank 0
+0211            l1      equ     0+$8000-endb1           ;bank 1
+3D08            l2      equ     0+$8000-endb2           ;bank 2
+14A0            l3      equ     0+$8000-endb3           ;bank 3
+6A80            ;l4     equ     0+$8000-endb4           ;bank 4
+6A80            ;l5     equ     0+$8000-endb5           ;bank 5
+6A80            ;l6     equ     0+$8000-endb6           ;bank 6
+6A80            ;l7     equ     0+$8000-endb7           ;bank 7
+6A80            
+6A80            
+6A80            

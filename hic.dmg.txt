@@ -1,0 +1,122 @@
+_hicolorHBL::
+	push	AF
+	push	HL
+	push	DE
+	ld	A, (hibank)
+	ld 	($2000), A
+	
+	ld		(saveSP),sp			;store SP.
+
+	ld		hl,$4000	;all palette blocks start at $4000
+data.
+	ld		sp,hl				;
+
+	ld		a,#0x80				;
+	ldh	(0x68), A			;setup palette write.
+
+	ld		hl,#0xFF44         		;
+	xor		a
+
+_wait:			
+
+	cp		(HL) 				;
+	jr		nz,_wait
+
+_palloop:
+
+	pop		de            		;get 2 palette values.
+
+	ld		l,#0x41		;point HL to STAT.
+
+_waitstat2:
+
+	bit		1,(hl)				;wait for HBlank.
+	jr		nz,_waitstat2 		;
+
+fti:
+
+	ld		l,#0x69
+
+	ld		(hl),e        		;
+	ld		(hl),d        		;write 2 palette values.
+
+	pop		de
+	ld		(hl),e				;
+	ld		(hl),d
+
+	pop		de            		;get 2 palette values.
+	ld		(hl),e        		;
+	ld		(hl),d        		;write 2 palette values.
+
+	pop		de					;
+	ld		(HL),e				;
+	ld		(HL),d	
+
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+
+	ldh		a,(#0x44)        		;
+	cp		#142					;test for
+bottom of image.
+	jr		nz,_palloop			;
+
+	ld		A,(saveSP)
+	ld		L, A
+	ld		A,(saveSP + 1)
+	ld		H, A
+	ld		sp,hl
+	ld		A, #1
+	ld		(0x2000), A
+	pop	DE
+	pop	HL
+nopic:
+	pop	AF
+	reti
+</HTML>
+

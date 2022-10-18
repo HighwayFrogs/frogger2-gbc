@@ -1,0 +1,29 @@
+;animate		;test
+	ld	a,(frame)
+	and	$f
+	ret	nz
+	ld	a,(lilyframe)
+	inc	a
+	and	3
+	ld	(lilyframe),a
+	swap	a	;*16
+	ld	e,a
+	xor	a
+	ld	d,a
+	ld	hl,lilyfont
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	ld	a,l
+	ld	(dmasrc+1),a
+	ld	a,h
+	ld	(dmasrc),a
+	ld	a,$40
+	ld	(dmadest+1),a
+	ld	a,$90
+	ld	(dmadest),a
+	ld	a,$3
+	ld	(dmactrl),a
+	ret	
+	

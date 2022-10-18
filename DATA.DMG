@@ -1,0 +1,27 @@
+;;;; for every world, there is
+
+; 1. An init vector
+; 2. Collision data
+; 3. jump vector for gamecode
+
+initworldtab
+	dw	initw0
+	dw	initw1
+	dw	initw2
+	dw	initw3
+	dw	initw4
+	dw	initw5
+gamecodetab			;main loop code for ths scenario
+	dw	world0code
+	dw	world1code
+	dw	world2code
+	dw	world3code
+	dw	world4code
+	dw	world5code
+
+;new frog frames -- attribute byte, then first character byte
+
+jumptab		;frame offsets based on jumcount
+	db	0,4,4,3,3,2,2,1
+
+

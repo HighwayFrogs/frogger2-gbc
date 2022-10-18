@@ -1,0 +1,9 @@
+	xor	a		;Disable interrupts
+	ld	($ffff),a
+	ld	a,%00110000	;Disable keypad
+	ld	($ff00),a
+	ld	a,%00000001		;Switch to double-speed mode
+	ld	($ff4d),a
+	stop
+
+

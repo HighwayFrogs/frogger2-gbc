@@ -1,0 +1,688 @@
+;GAMEBOY BASE PROGRAM
+
+
+	includesym	logo
+	includesym	grfx
+	includesym	hiart1
+	includesym	hiart2
+	includesym	hiart3
+	includesym	hiart4
+	includesym	rec
+
+;Hardware	equates
+ramenable	equ	$0
+MBC_REG0 	equ	$1fff
+MBC_REG1 	equ	$2000
+MBC_REG2 	equ	$5fff
+MBC_REG3	equ	$7fff
+
+bitright	equ	4		;joystick direction masks
+bitleft		equ	5
+bitup		equ	6
+bitdown		equ	7
+bitselect	equ	2
+bitstart	equ	3
+bitbutb		equ	1
+bitbuta		equ	0
+
+right		equ	$10		;joystick direction masks
+left		equ	$20
+up		equ	$40
+down		equ	$80
+select		equ	4
+start		equ	8
+butb		equ	2
+buta		equ	1
+
+
+
+
+;*** RAM Definition ***
+
+	org	$a000		;battery backup ram
+ramdataloc
+
+recordholders	ds	$100
+recordtimes	ds	$80
+
+timebit		equ	1
+clearbit	equ	2
+perfbit		equ	4
+visitbit	equ	$80
+playerstats
+player1stats	ds	$40
+player2stats	ds	$40
+player3stats	ds	$40
+		ds	7
+signature	ds	2
+
+	org	$a400
+
+NUMHI		equ	8	;eight names saved
+hiscores	ds	NUMHI*4	;high-score buffer
+hinames		ds	NUMHI*8	;high-score names
+
+	org	$C000			;Working RAM
+
+OAMshad	ds	160	;keep at page boundary
+oamend	equ	$
+freeoam	equ	$10	;after frog
+
+fudge
+	ds	$100
+
+
+vbflag		ds	1	;vertical blank flag set by interrupt
+frame		ds	1
+vbcount		ds	1
+temp0		ds	2
+soundsav	ds	1	;save sound mix during pause
+sndsavea	ds	1
+random		ds	1
+pause		ds	1
+
+:MBCshad0	ds	4		;Put shadows in Game Boy RAM
+:MBCshad1	equ	MBCshad0+1
+:MBCshad2	equ	MBCshad0+2
+:MBCshad3	equ	MBCshad0+3
+
+t0		ds	1
+t1		ds	1
+t2		ds	1
+t3		ds	1
+t4		ds	1
+t5		ds	1
+t6		ds	1
+t7		ds	1
+t8		ds	1
+
+decmptmp	ds	1	;for decompression code
+decmpcom	ds	1 
+kludge		ds	2	;for decompression code
+mode		ds	1	;game mode
+
+; game specific equates go here
+
+; globals
+
+screenx		ds	1	;scroll value
+screeny		ds	2	;high byte is used for positioning sprites
+banksave	ds	1
+dmaflag		ds	1	;set when dma registers are ready
+
+;FROG VARIABLES
+
+
+frogx		ds	1
+frogy		ds	1
+
+frogvars			;these are cleared on init
+frogframe	ds	1
+jumpcount	ds	1
+dying		ds	1
+frogdir		ds	1
+jumpx		ds	1
+jumpy		ds	1
+yscrollflag	ds	1
+jtype		ds	1	;type of jump (normal, on ice, etc.)
+ttype		ds	1	;type of terrain frog is on
+gluecount	ds	1	;how many times frog tries to jump off glue
+falling		ds	1
+freezefrog	ds	1	;while showing next group of hops
+died		ds	1	;to check for perfect level
+frogvarend
+
+levdatastart
+; data that varies from level to level
+world		ds	1	;
+truex		ds	1
+truey		ds	2
+levbank		ds	1	;graphics bank
+levfont		ds	2
+levmap		ds	2
+levpal		ds	2
+levsprites	ds	2
+:NUMLANES	equ	32
+lanespd		ds	NUMLANES	;speed of lane scroll
+		ds	2	;buffer
+levdataend
+
+worlddatastart
+
+; first and last+1 character numbers for these terrain types
+doorchar	ds	2	;exit to next level
+floatchar	ds	2	;logs, turtles, etc
+hitchar		ds	2	;cars
+drownchar	ds	2	;water
+slipchar	ds	2	;ice
+gluechar	ds	2	;glue
+wallchar	ds	2	;barrier
+maskchar	ds	2	;to mask gem sprites 
+	    	ds	2
+worlddataend
+
+
+lanetime	ds	NUMLANES	;value from lanespd
+
+startingx	ds	1	;for restart when player dies
+startingy	ds	2	;changed by checkpoint terrain
+
+; end of canned values
+
+xlane		ds	NUMLANES	;scroll values for lanes
+nextlane	ds	1		;pointer to next xlane entry
+lyshad		ds	1		;for lcd irq
+nextstrip	ds	2	;for scrolling
+
+;collision variables
+
+objx		ds	1	;temps for passing values
+objy		ds	1
+colchar		ds	3
+colchar0	equ	colchar
+colchar1	equ	colchar+1
+colchar2	equ	colchar+2
+center		ds	1	;character directly under frog
+froglane	ds	1
+charx		ds	1	;frog's current map character
+chary		ds	1
+xmod8		ds	1	;for fine tuning the collisions
+xmod16		ds	1
+loglane		ds	1	;for moving frog if on log in that lane
+
+
+lcloc		equ	$8908	;road stripe in world one
+
+; GENERAL SINKING TURTLE VARIABLES
+
+tcount0		ds	1	;frame pointer
+tcount1		ds	1	;second turtle pattern
+tframe0		ds	1
+
+lilyframe	ds	1
+
+ripples		ds	8	;for flashing the water
+ripplecnt	ds	1
+
+
+NUMGEMS		equ	16
+gemdata		ds	4*numgems	;status, x, ylo, yhi
+gemptr		ds	1
+gemx		ds	1
+gemy		ds	2
+gems		ds	1	;counter for gems remaining
+gemvalue	ds	1	;each gem goes up in value
+gemcount	ds	1	;counter for gems collected
+gemattrib	ds	1
+drewit		ds	1	;sprite-draw flag, 1 = drew the sprite
+oamptr		ds	2	;pointer for drawing and to clear unused part
+saveptr		ds	2	;general use, and for sprite ptr
+
+spritebrain	ds	2	
+				;These (spritex - spritecounter)
+				;are swapped in and out for
+spritex		ds	1	;each sprite, making indexing easier.
+spritey		ds	2	;The general variables can be swapped 
+spriteframe	ds	1	;as needed.
+spritedx	ds	1
+spritedy	ds	1	
+spritecounter	ds	1
+spritevar0	ds	1
+spritevar1	ds	1
+spritevar2	ds	1
+spritevar3	ds	1
+spritevar4	ds	1
+spritevar5	ds	1
+
+			 	;used by sprite draw routine
+spriteatt	ds	1
+spritewidth	ds	1
+spritedepth	ds	1	;they might all be 2 high (1x1s can
+spritechar	ds	1	;go with gems?)
+
+scrnptr		ds	6	;save the 3 addresses tested for collisions
+timebuff	ds	8
+timeptr		ds	1
+
+menleft		ds	1	
+score		ds	4
+lowy		ds	1	;for scoring when jumping up to new lane
+scorebuf	ds	1	;for additive scoring (gems, etc.)
+
+; WORLD 2 variables
+
+gameptr		ds	2	;index into table of vectors
+gamedel		ds	1	;delay between tiles
+pathstart	ds	2	;save path pointer (for checkpoints on path)
+pathptr		ds	2	;screen loc of current character
+delval		ds	1	;diminishing delay value
+saveatt		ds	1	;attribute of piece under path marker
+showtimes	ds	1	;if <>0 then show time stats
+levtime		ds	4	;counter for level time
+				;byte 0 is mod 6 for 10th of a second
+				;byte 1 is mod 10
+				;byte 2 is mod 60
+
+;menu variables
+
+arrowpos	ds	1	;pointer for name and menu select
+arrowmax	ds	1	;maximum value for this screen
+player		ds	1	;which player from name screen
+guest		ds	1	; set if player is a guest
+				;no saves to ram
+
+cursorx		ds	1
+cursory		ds	1
+namex		ds	1
+repeat		ds	1	;repeat counter for joystick
+visit		ds	1	;set if visiting
+arrowtop	ds	1	;highest menu position
+
+toggle		ds	1
+hiflag		ds	1
+hicursor	ds	1
+hilane		ds	1
+hiptr		ds	2
+
+gothome		ds	1
+timedir		ds	1
+
+ingame		ds	1	;used by pause code
+dohi		ds	1	;for vb code to set hi lcdc irq
+riding		ds	1	;on a sprite platform
+
+vatframe	ds	1	;ami,ation counter
+menuarrow	ds	1	;modify default menu arrow on entry
+				;based on various factors
+gatorcount	ds	1
+hibank		ds	1	;bank for current hicolor palette
+savestack	ds	2
+govertoggle	ds	1
+govercount	ds	1
+fbcount		ds	1	;for fireballs
+arrowx		ds	16	;x offset for menu arrow
+rightx		ds	16	;flanking arrow
+hipalval	ds	1	;grabbed from attribute data
+
+xlanebuff	ds	NUMLANES
+
+allhigh		ds	1
+trueframe	ds	1	;base frame for jumps and idles
+facount		ds	1	;counter for frog special animation
+fatype		ds	1
+fadel		ds	1
+faptr		ds	1
+idledel		ds	1	;delay until next animation
+idlecnt		ds	1	;counter for number of idle frames
+idleframe	ds	1	;frame # (added to trueframe)
+
+newtrec		ds	1	;new time record
+nopause		ds	1
+iscold		ds	1
+fishsound	ds	1
+ldcount		ds	1	;logo delay counter
+gotfrog		ds	1
+savefy		ds	1	
+hisavebank	ds	1
+saveaud		ds	1
+savety		ds	1
+recptr		ds	2
+recline		ds	1
+recdel		ds	1
+reccount	ds	1
+
+stars		ds	1
+levstars	ds	1
+eggcount	ds	1
+eggsound	ds	1
+eggsprite	ds	1
+
+mapbuff		equ	$c800	;64 high by 32 wide
+
+	org	$d800
+spvars			; $10 bytes for each enemy
+warpsp	equ	spvars+$f0
+; offsets into data
+spstat		equ	0
+spbrain		equ	1
+spx		equ	3
+spylo		equ	4
+spyhi		equ	5
+spframe		equ	6
+spdx		equ	7
+spdy		equ	8	
+spcounter	equ	9
+spvar0		equ	$a		
+spvar1		equ	$b		
+spvar2		equ	$c	
+spvar3		equ	$d	
+spvar4		equ	$e	
+spvar5		equ	$f		
+
+ACTIVE		equ	1	; spstat bits
+ONSCREEN	EQU	2
+
+	org	$d900		;after mapbuff
+dmabuff		ds	$40	;must be on 16-byte boundary?
+chartypes	ds	$40	;collision types for each cell
+
+
+; ram data moved in from battery ram (or from rom during development)
+
+	org	$da00
+playername	ds	8
+level		ds	1	; running count, not world based
+continue	ds	1	;highest level visited
+lastvisit	ds	1	;most recent level visited
+soundflag	ds	1
+musicflag	ds	1
+vislives	ds	1
+whoami		ds	1
+special		ds	1
+
+
+stats	ds	$20	;byte for each level
+			; bit 0 = beat time
+			; bit 1 = got all the gems
+			; bit 2 = perfect level (didn't die and got gems)
+			; bit 7 = finished level
+allstars	ds	$10
+
+
+	org	$db00
+	ds	$40	;for scott's audio
+
+
+ram_top
+myvec		equ	$dff2
+test0		equ	$dff8
+test1		equ	$dff9
+saveplayer	equ	$dffa
+saveflag	equ	$dffb
+titleflag	equ	$dffd
+firststart	equ	$dffe	;if 0, then don't allow start from title
+;gameover	equ	$dfff
+
+	org	$FF80			;Internal (to DMG chip) RAM
+
+dma_to_OAM	ds	10		;Space for DMA routine
+
+stick
+cnt1		ds      1       	;key input (controller)
+trg1		ds      1       	;trigger input (er)
+lanecount	ds	1		;irq pointer
+
+iram_end
+
+
+; game equates
+
+;flume jumping equates
+
+
+fjumplen	equ	$10		;length in frames of flume jump
+fxdist		equ	(32/fjumplen)	;x distance of jump per frame
+fydist		equ	1
+
+lmode	equ	0	;logo
+tmode	equ	1	;title
+smode	equ	2	;select
+gmode	equ	3	;game
+omode	equ	4	;game over
+
+
+
+
+	if 	quick
+onesec	equ	1	;frames per second
+	else
+onesec	equ	60
+	endif
+
+
+;bank equates
+
+;logobank	equ	$3f		;for logos
+;levtransbank	equ	$3f
+;monobank	equ	logobank-1	;for mono message
+;titlebank	equ	monobank-1	;for title graphics
+
+csetbank	equ	1
+textbank	equ	1
+spritebank	equ	3
+animbank	equ	3
+
+w0bank		equ	4
+w1bank		equ	$c
+w2bank		equ	7
+w3bank		equ	6
+w4bank		equ	5
+carsbank	equ	5
+w5bank		equ	8
+
+frogoam		equ	oamshad
+
+
+maxlevel	equ	32	;for development
+
+xmin		equ	$10	;screen top for jump limit
+xmax		equ	$f0
+ymin		equ	$10
+ymax		equ	$e0
+
+spnum		equ	255	;number of sprite characters
+
+
+; debug/devel stuff
+lettern		equ	$7c
+letterd 	equ	$7d
+letterf		equ	$7e
+letterh		equ	$7f
+oamdevel	equ	oamshad+$9e
+
+; jumping equates
+
+jnorm		equ	0
+jice		equ	1
+jglue		equ	2
+jbounce		equ	4
+
+;terrain types
+tnorm		equ	0
+tice		equ	1
+tglue		equ	2
+tbounce		equ	4
+
+; animation test
+
+lilychar	equ	4
+lilyloc		equ	$9040
+turtleloc0	equ	$9500
+turtleloc1	equ	$9540
+
+; equates for variable terrain types
+
+w0turtle	equ	20*4	;character#
+w0drown		equ	9	;first unsafe frame
+
+
+digits		equ	$24
+lastoam		equ	$a0
+gemnumloc	equ	$9c0c
+gemblank	equ	2	;blank for gem digits
+gemnumstart	equ	43
+exitchar	equ	59*4
+waterchar	equ	60*4
+
+checkoff	equ	4*4	;checkpoint off (activated) character
+
+; collision bits
+SAFE	equ	0
+HURT	equ	1	;cars, fire, electric, ect.
+GLUB	equ	2	;water
+PLAT	equ	4	;moving platform
+
+timechar	equ	8
+timeloc		equ	$9c26
+scoreloc	equ	$9c20
+ZEROCHAR	equ	27
+MENCHAR		equ	ZEROCHAR+10
+menloc		equ	$9c20+15
+alphastart	equ	$c0
+alphastart2	equ	$40
+csetloc		equ	$8c00
+csetloc2	equ	$9400
+levtextloc	equ	$9820		
+
+W1FALL		equ	4
+W2FALL		equ	16
+W4FALL		equ	4
+W2LEVSTART	equ	7
+W2SWITCH	equ	17
+W2PATH		equ	18
+W2SAFE		equ	19
+W2CHECK		equ	21
+W2FALLPAL	equ	4
+W2SAFEPAL	equ	2
+W2CRUMBLE	equ	22
+
+gatorchar	equ	10*4
+
+
+;;;;; SPRITE CHARACTER EQUATES
+
+;; globals
+
+frogchar	equ	0
+gemframe	equ	48*4
+contchar	equ	45*4
+chkchar		equ	42*4
+moretimechar	equ	46*4
+babychar	equ	35*4
+poofchar	equ	37*4
+oneupchar	equ	33*4
+tipchar		equ	40*4
+starchar	equ	poofchar
+starend		equ	starchar+8
+
+;; locals
+
+; world 0
+
+snakechar	equ	0*4	;first character in snake set
+
+; world 1
+
+batchar		equ	0*4
+spiderchar	equ	4*4
+
+
+
+; world 3
+fishchar	equ	0*4
+
+
+; world 4
+platchar	equ	0*4
+
+; world 5
+beechar		equ	4*4
+
+
+;;;;; SPRITE PALETTE EQUATES
+
+;; globals
+
+globbank	equ	$8
+
+frogpal		equ	0+globbank
+gempal		equ	1+globbank
+checkpal	equ	4+globbank
+hgpal		equ	4+globbank
+oneuppal	equ	0+globbank
+babypal		equ	1+globbank
+contpal		equ	5+globbank
+tippal		equ	3+globbank
+bfpal		equ	1+8
+poofpal		equ	2+8
+starpal		equ	poofpal
+
+
+;; locals
+
+locbank		equ	$0
+
+
+; world 0
+logsnakepal	equ	6+locbank
+grasssnakepal	equ	6+locbank
+
+
+; world 1
+batpal		equ	6+locbank
+spiderpal	equ	7+locbank
+
+
+; world 3
+fishpal		equ	6+locbank
+
+; world 4
+platpal		equ	7+locbank
+
+
+; world 5
+
+beepal		equ	6
+
+; for end of level stats
+
+	if flashy
+stattimeloc	equ	$9820+$400
+	else
+stattimeloc	equ	$9820
+	endif
+
+
+playernameloc	equ	$98c5
+letterloc	equ	$98c4
+enternameloc	equ	$9866
+menutop		equ	$9883
+soundonloc	equ	$986a+3
+musiconloc	equ	$98aa+3
+vislivloc	equ	$98ed+2
+frogsloc	equ	$9929+1-3
+
+iconsloc	equ	$8c00
+iconchar	equ	$c0
+
+hiwordloc	equ	$9823	;$9945-2	;-$20	;position for "HIGH SCORE"
+hiloc		equ	$9863	;$9983	;-$20	;screen position for high score table
+
+ICEWORLD	equ	3
+ROCKWORLD	equ	2
+PONDWORLD	equ	0
+GEMWORLD	equ	1
+MINEWORLD	equ	4
+LAVAWORLD	equ	5
+
+; AUDIO EQUATES
+
+audbank		equ	$20
+startsong	equ	$4000		;Start tune (tune # in B register, tune #0 stops music)<BR>
+startsound	equ	$4003		;Start sound (sound # in B register, sound #0 stops sounds)<BR>
+audcode		equ	$4006		;Poll sound (call once per frame)<BR>
+pauseaud	equ	$4009		;Pause sound<BR>
+resumeaud	equ	$400C		;Resume sound (un-pause)<BR>
+
+
+divedel		equ	8
+
+startsnd	equ	15
+sticksnd	equ	17
+stickupsnd	equ	16
+stickdnsnd	equ	17
+badsnd		equ	18
+
+froglilloc	equ	$9d86-2
+dieval		equ	$a0
+

@@ -1,0 +1,189 @@
+lcdcirq
+	push	af
+	push	hl
+	push	bc
+
+	ld	a,(world)
+	cp	rworld
+	jr	nz,noirq
+
+
+; index scroll value (from ram) and next LYC value (from table
+
+	ld	hl,lanecount
+	ld	a,(hl)
+	inc	(hl)
+	ld	b,(hl)
+	ld	hl,xlane
+	add	a,l
+	ld	l,a
+	ld	a,(hl)
+	ld	hl,STAT
+	
+l0	bit	1,(hl)
+	jr	nz,l0	 
+	ld	(scx),a
+	ld	c,a		;save it for modifying stripe
+	ld	hl,lytab
+	ld	a,b
+	add	a,l
+	jr	nc,l9
+	inc	h
+l9
+	ld	l,a
+	ld	a,(hl)
+	ld	(lyc),a
+
+	ld	hl,stripetab
+	ld	a,c
+	and	7
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+	ld	a,(hl)
+
+	ld	hl,STAT
+	
+l0	bit	1,(hl)
+	jr	nz,l0	 
+	ld	(lcloc),a
+
+noirq
+	pop	bc
+	pop	hl
+	pop	af
+	
+	reti
+
+stripetab
+;	db	$1e,$3c,$78,$f0,$e1,$c3,$87,$0f
+	db	$0f,$87,$c3,$e1,$f0,$78,$3c,$1e
+
+movecars
+l0
+	ld	a,(lanetime+1)	       ;top car
+	and	a
+	jr	z,l1
+	dec	a
+	ld	(lanetime+1),a
+	jr	nz,l1
+	ld	a,(lanespd+1) 	;timed out, restore
+	ld	(lanetime+1),a	
+				; and do scroll
+	ld	a,(xlane+0)
+	inc	a
+	ld	(xlane+0),a
+l1				       ;fast car
+	ld	a,(lanespd+2)
+	ld	hl,xlane+1
+	add	a,(hl)
+	ld	(hl),a
+l2
+	ld	a,(lanetime+3)		;car
+	and	a
+	jr	z,l3
+	dec	a
+	ld	(lanetime+3),a
+	jr	nz,l3
+	ld	a,(lanespd+3) 	;timed out, restore
+	ld	(lanetime+3),a	
+				; and do scroll
+	ld	a,(xlane+2)
+	inc	a
+	ld	(xlane+2),a
+l3
+	ld	a,(lanetime+4)		;car
+	and	a
+	jr	z,l4
+	dec	a
+	ld	(lanetime+4),a
+	jr	nz,l4
+	ld	a,(lanespd+4) 	;timed out, restore
+	ld	(lanetime+4),a	
+				; and do scroll
+	ld	a,(xlane+3)
+	dec	a
+	ld	(xlane+3),a
+l4
+	ld	a,(lanetime+5)		;fifth car (not in right now)
+	and	a
+	jr	z,l5
+	dec	a
+	ld	(lanetime+5),a
+	jr	nz,l5
+	ld	a,(lanespd+5) 	;timed out, restore
+	ld	(lanetime+5),a	
+				; and do scroll
+	ld	a,(xlane+4)
+	inc	a
+	ld	(xlane+4),a
+l5
+xscout
+	ret
+
+
+clearlanes
+	xor	a
+	ld	hl,xlane
+	ld	b,NUMLANES
+l0
+	ld	(hli),a
+	dec	b
+	jr	nz,l0
+	ret
+
+initlanes
+	ld	a,(level)
+	and	7
+	sla	a
+	sla	a
+	sla	a	;*8
+	ld	hl,speedtab	;speed for each lane
+	add	a,l
+	ld	l,a
+	jr	nc,init1
+	inc	h
+init1	ld	de,lanespd
+	ld	bc,lanetime
+	ld	a,NUMLANES
+l0
+	push	af
+	ld	a,(hli)
+	ld	(de),a
+	ld	(bc),a
+	inc	de
+	inc	bc
+	pop	af
+	dec	a
+	jr	nz,l0
+	ret
+
+speedtab		;lane speeds for each level (padded to 16 bytes)
+
+	db	0,$03,$ff,$04,$04,$04,0,0
+	db	0,$03,$ff,$04,$04,$04,0,0
+	db	0,$03,$fe,$04,$04,$04,0,0
+	db	0,$03,$fe,$04,$03,$04,0,0
+	db	0,$03,$fe,$04,$03,$04,0,0
+	db	0,$02,$fe,$03,$02,$04,0,0
+	db	0,$02,$fe,$03,$02,$03,0,0
+	db	0,$02,$fd,$03,$01,$03,0,0
+
+ 
+
+
+lytab		;table of lane y values for irq for ROAD GAME
+
+	db	$1f
+	db	$2f
+	db	$3f
+	db	$4f
+	db	$5f
+	db	$6f
+	db	$1f
+	db	$0
+
+
+

@@ -1,0 +1,278 @@
+; for each sprite, move the x and y data into it's block, 
+; set the status byte, and jump to the init routine
+
+initsprites
+	ld	hl,spvars
+	ld	c,0
+	call	zerohlc
+	ld	a,(level)
+	sla	a
+	ld	hl,levsprites
+	call	stuffhl
+	ld	de,spvars
+l0
+	ld	a,(hli)	;x position
+	and	a
+	ret	z	;all done
+	push	de
+	push	af	;save x location
+	ld	a,1
+	ld	(de),a	;status
+	inc	de
+	inc	de
+	inc	de	;skip brain pointer
+	pop	af
+	ld	(de),a
+	inc	de
+	ld	a,(hli)
+	ld	(de),a	;ylo
+	inc	de
+	ld	a,(hli)
+	ld	(de),a	;yhi
+	ld	a,(hli)
+	ld	(spritevar0),a
+	ld	a,(hli)
+	ld	(spritevar1),a ;for general passed parameter
+	ld	a,(hli)	;brainlo
+	ld	c,a
+	ld	a,(hli)	;brainhi
+	push	hl
+	ld	h,a
+	ld	l,c
+			;hl = init routine
+	call	calljump
+	pop	hl
+	pop	de
+	ld	a,$10
+	add	a,e
+	ld	e,a
+	jr	l0
+
+
+
+starcode
+	ld	a,(newtrec)
+	and	a
+	ret	nz
+	ld	a,(gems)
+	and	a
+	ret	z
+	ld	c,0	;count stars
+	ld	a,(died)
+	cp	3
+	jr	c,star1
+	ld	a,3		;died too many times
+star1		
+	ld	b,a
+	ld	a,3
+	sub	b
+	add	a,c
+	ld	c,a
+
+	ld	a,(gemcount)
+	srl	a
+	srl	a
+	add	a,c
+	ld	c,a
+
+skipstars
+
+	
+	call	writeon
+	ld	hl,recordtimes+2	;seconds
+	ld	a,(level)
+	sla	a
+	sla	a
+	call	indexbya
+	ld	a,(hli)
+	ld	b,a
+	ld	a,(hl)
+	and	a
+	jr	z,nomins
+	ld	a,b
+	add	a,60
+	ld	b,a		;record time
+nomins
+	ld	a,(levtime+2)
+	ld	e,a
+	ld	a,(levtime+3)
+	and	a
+	jr	z,nomins1
+l0
+	push	af
+	ld	a,e
+	add	a,60
+	ld	e,a
+	pop	af
+	dec	a
+	jr	nz,l0
+nomins1
+	ld	a,e
+	sub	b	;get difference from best time
+l0
+	cp	20
+	jr	nc,l1
+	add	a,5
+	inc	c	;add a star for each 10 seconds within 50 of record
+	jr	l0
+l1
+showstars
+	ld	de,stattimeloc+$1e0
+	ld	a,c
+	and	a
+	jr	nz,l2
+	inc	a
+l2
+	cp	11	;max 10 stars
+	jr	c,l3
+	ld	a,10
+l3
+	ld	(stars),a
+	push	af
+	ld	a,c
+	ld	a,20
+	sub	c
+	srl	a
+	add	a,e	;center the stars
+	ld	e,a
+	pop	af
+
+l4
+	push	af
+	ld	a,";"
+	call	writehichar
+	pop	af
+	dec	a
+	jr	nz,l4
+startest
+	call	getstars
+	ld	a,(levstars)
+	ld	b,a
+	ld	a,(stars)
+	cp	b
+	ret	c
+	call	putstars
+	ret
+
+getstars
+	ld	hl,allstars
+	ld	a,(level)
+	ld	b,a
+	srl	a
+	call	indexbya
+	ld	a,(hl)
+	bit	0,b
+	jr	z,gets1
+	swap	a
+gets1
+	and	$f
+	ld	(levstars),a
+	ret
+
+getstars1
+	ld	hl,allstars
+	ld	a,(lastvisit)
+	ld	b,a
+	srl	a
+	call	indexbya
+	ld	a,(hl)
+	bit	0,b
+	jr	z,gets11
+	swap	a
+gets11
+	and	$f
+	ld	(levstars),a
+	ret
+
+
+putstars
+	ld	hl,allstars
+	ld	a,(level)
+	ld	b,a
+	srl	a
+	call	indexbya
+	ld	a,(hl)
+	bit	0,b
+	jr	z,putlo
+	and	$0f
+	ld	b,a
+	ld	a,(stars)
+	swap	a
+	or	b
+	ld	(hl),a
+	call	savestats
+	ret
+putlo
+	and	$f0
+	ld	b,a
+	ld	a,(stars)
+	or	b
+	ld	(hl),a
+	call	savestats
+	ret
+
+	
+starloc	equ	$99ef
+drawstars
+	call	getstars1
+	ld	a,(levstars)
+	ld	c,a
+	ld	de,starloc
+	ld	b,8	;12
+l0
+	ld	a,c
+	and	a
+	jr	z,doblank
+	dec	c
+	ld	a,32+iconchar
+doblank
+	push	af
+
+l1	ld	a,(stat)
+	bit	1,a
+	jr	nz,l1
+	pop	af
+	ld	(de),a
+	inc	de
+	dec	b
+	jr	z,l3
+	ld	a,b
+	and	3
+	jr	nz,l0
+	ld	hl,$20-4
+	add	hl,de
+	push	hl
+	pop	de
+	jr	l0
+
+l3	
+	ld	bc,0
+	ld	a,(levstars)
+	cp	9
+	jr	c,write5th	;erase 5th star in each row
+	ld	b,32+iconchar
+	jr	z,write5th
+	ld	c,32+iconchar
+write5th
+	ld	de,starloc+4
+	ld	a,b
+	push	af
+l0	ld	a,(stat)
+	bit	1,a
+	jr	nz,l0
+	pop	af
+	ld	(de),a
+ninestars	
+ 	ld	de,starloc+32+4
+	ld	a,c
+	push	af
+l1	ld	a,(stat)
+	bit	1,a
+	jr	nz,l1
+	pop	af
+	ld	(de),a
+	ret
+
+
+
+

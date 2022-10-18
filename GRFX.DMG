@@ -1,0 +1,83 @@
+	thisbank 4
+	org	$4000
+w0sprite	includeraw	grfx\w0sprite.raw
+w0font		includeraw	grfx\w0font.raw
+w0pal		includeraw	grfx\w0.pal
+w0l0map		includeraw	grfx\w0l0map.raw
+w0l1map		includeraw	grfx\w0l1map.raw
+w0l2map		includeraw	grfx\w0l2map.raw
+w0l3map		includeraw	grfx\w0l3map.raw
+w0l4map		includeraw	grfx\w0l4map.raw
+w0l5map		includeraw	grfx\w0l5map.raw
+
+
+	thisbank 6
+	org	$4000
+w3sprite	includeraw	grfx\w3sprite.raw
+w3font		includeraw	grfx\w3font.raw
+w3pal		includeraw	grfx\w3.pal
+w3l0map		includeraw	grfx\w3l0map.raw
+w3l1map		includeraw	grfx\w3l1map.raw
+w3l2map		includeraw	grfx\w3l2map.raw
+w3l3map		includeraw	grfx\w3l3map.raw
+w3l4map		includeraw	grfx\w3l4map.raw
+w3l5map		includeraw	grfx\w3l5map.raw
+
+endb6
+
+
+
+	thisbank 7
+	org	$4000
+w2sprite	includeraw	grfx\w2sprite.raw
+w2font		includeraw	grfx\w2font.raw
+w2pal		includeraw	grfx\w2.pal
+w2l0map		includeraw	grfx\w2l0map.raw
+w2l1map		includeraw	grfx\w2l1map.raw
+w2l2map		includeraw	grfx\w2l2map.raw
+w2l3map		includeraw	grfx\w2l3map.raw
+w2l4map		includeraw	grfx\w2l4map.raw
+w2l5map		includeraw	grfx\w2l5map.raw
+
+
+endb7
+
+
+	thisbank 8
+	org	$4000
+
+w5sprite	includeraw	grfx\w5sprite.raw
+w5font		includeraw	grfx\w5font.raw
+w5pal		includeraw	grfx\w5.pal
+w5l0map		includeraw	grfx\w5l0map.raw
+w5l1map		includeraw	grfx\w5l1map.raw
+w5l2map		includeraw	grfx\w5l2map.raw
+w5l3map		includeraw	grfx\w5l3map.raw
+w5l4map		includeraw	grfx\w5l4map.raw
+w5l5map		includeraw	grfx\w5l5map.raw
+
+
+
+	thisbank	$37
+	org	$4000
+hilogobank	equ	$37
+hilogopal	includeraw	grfx\logopal.raw
+hilogomap	includeraw	grfx\logomap.raw
+		includeraw	grfx\logoatr.raw
+		includeraw	grfx\logotil.raw
+
+	thisbank	$36
+	org	$4000
+hiscrbank	equ	$36
+hiscrpal		includeraw	grfx\hiscrpal.raw
+hiscrmap		includeraw	grfx\hiscrmap.raw
+		includeraw	grfx\hiscratr.raw
+		includeraw	grfx\hiscrtil.raw
+
+
+
+
+
+	dumpsym	grfx
+
+

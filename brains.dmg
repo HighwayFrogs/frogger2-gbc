@@ -1,0 +1,2238 @@
+; each sprite has a block of data at $d8x0 - $d8xf
+; byte 0 = status
+; byte 1,2 = brain location
+; byte 3,4,5 = x, ylo, yhi
+; byte 6 = frame (from global frame index?)
+; byte 7 = dx
+; byte 8 = dy
+; byte 9 = counter (?)
+; bytes $a - $f = various uses
+
+; bytes are moved into 
+
+snakebrain0		 ;just go left 
+	call	getspdata
+	ld	a,(frame)
+	and	1
+	call	z,spritelr	;go left or right, depending on spritedir
+	call	animsnake
+	ld	a,4
+	ld	(spritewidth),a
+	ld	a,(spritevar0)
+	ld	(spriteatt),a
+	call	savespdata
+	call	drawsprite
+	call	snakespcol		;hit frog?
+	ret
+
+
+snakebrain1			;moving left\right on log
+	call	getspdata
+	ld	a,(level)
+	cp	5
+	jr	z,slither
+	ld	a,(frame)
+	and	1
+	jr	nz,nomove
+slither
+	ld	a,(spritedx)
+	call	testlimits	;left and right boundaries
+	call	spritelr	;go left or right, depending on spritedir
+nomove
+	call	animsnake
+	ld	a,4
+	ld	(spritewidth),a
+	ld	a,logsnakepal
+	ld	(spriteatt),a
+	call	savespdata
+	call	adjustx		;for scrolling, changes spritex
+	call	drawsprite
+	call	snakespcol		;hit frog?
+	ret
+
+
+animsnake
+	ld	a,snakechar
+	ld	b,a
+	ld	a,(frame)
+	srl	a
+	srl	a
+	srl	a
+	and	3
+	ld	hl,snaketab
+	call	indexbya
+	ld	a,(hl)
+	ld	(spritechar),a
+	ret
+
+snaketab
+	db	0,8,$10,8
+
+animcell			;2 frames, size is one cell
+	ld	a,(spritechar)
+	ld	b,a
+	ld	a,(frame)
+;	swap	a
+	srl	a
+	srl	a
+	and	4
+	add	a,b
+	ld	(spritechar),a
+	ret
+
+animcellfast			;2 frames, size is one cell
+	ld	a,(spritechar)
+	ld	b,a
+	ld	a,(frame)
+	and	4
+	add	a,b
+	ld	(spritechar),a
+	ret
+
+
+
+
+beebrain0
+	call	getspdata
+	ld	a,beechar
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,beepal
+	ld	(spriteatt),a
+	ld	hl,spritevar0
+	ld	a,(hli)
+	ld	h,(hl)
+	ld	l,a
+	xor	a
+	ld	(spritedx),a
+	ld	(spritedy),a
+	ld	a,(frame)
+	and	0		;3
+	call	z,patterns
+	call	animcellfast
+	call	savespdata
+	call	drawsprite
+	call	spcol
+	ret
+
+fishbrain0
+	xor	a
+	ld	(fishsound),a
+	call	getspdata
+	ld	a,2
+	ld	(spritewidth),a
+	ld	b,fishpal
+	ld	a,(spritey)
+	and	$40
+	swap	a
+	srl	a
+	srl	a
+	add	a,b
+	ld	(spriteatt),a
+	ld	a,(spriteframe)
+	and	a
+	jr	z,emerge0	;just starting out
+	cp	4
+	jr	c,leaping
+	cp	7
+	jr	c,sliding
+exiting
+	ld	a,(frame)
+	and	3	;7
+	jr	nz,drawfish
+	ld	a,(spriteframe)
+	inc	a
+	ld	(spriteframe),a
+	call	savespdata
+	ld	a,(spriteframe)
+	cp	10
+	call	z,newfish
+	jr	drawfish
+leaping
+	ld	a,(frame)
+	and	3
+	jr	nz,drawfish
+	ld	a,(spriteframe)
+	inc	a
+	ld	(spriteframe),a
+	call	savespdata
+	jr	drawfish
+emerge0
+	ld	a,(frame)
+	and	7	;$f
+	jr	nz,drawfish
+	call	flipdx
+	ld	a,(spritevar1)
+	dec	a
+	ld	(spritevar1),a
+	jr	nz,drawfish
+	ld	a,1
+	ld	(spriteframe),a
+	ld	(fishsound),a
+drawfish
+	call	savespdata
+	ld	a,(spriteframe)
+	sla	a
+	sla	a
+	ld	(spritechar),a
+	call	drawsprite
+	call	spcol
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(fishsound)
+	and	a
+	ret	z
+	ld	a,12
+	call	dosound
+	ret
+	ret
+
+sliding
+	ld	a,(frame)
+	srl	a
+	srl	a
+	and	1
+	add	a,5
+	ld	(spriteframe),a
+	ld	a,(spritex)
+	ld	b,a
+	ld	a,(spritedx)
+	add	a,b
+	ld	(spritex),a
+	add	a,$10
+	cp	$10
+	jr	nc,drawfish
+	ld	a,7
+	ld	(spriteframe),a
+	jr	drawfish
+
+
+	if 0
+
+fishbrain0
+	xor	a
+	ld	(fishsound),a
+	call	getspdata
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,fishpal
+	ld	(spriteatt),a
+	ld	a,(spriteframe)
+	and	a
+	jr	z,samef	;fish in comping up
+emerging
+	ld	a,(frame)
+	and	$3
+	jr	nz,samef
+	ld	a,(spriteframe)
+	dec	a
+	ld	(spriteframe),a
+	jr	z,samef
+	ld	a,1
+	ld	(fishsound),a
+samef
+	ld	a,(spriteframe)
+	sla	a
+	sla	a
+	ld	(spritechar),a
+	call	z,movefish
+	call	savespdata
+	call	drawsprite
+	call	spcol
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(fishsound)
+	and	a
+	ret	z
+	ld	a,12
+	call	dosound
+	ret
+
+	endif
+
+
+movefish
+	ld	a,(spritex)
+	ld	b,a
+	ld	a,(spritedx)
+	add	a,b
+	ld	(spritex),a
+	add	a,$10
+	cp	$10
+	call	c,newfish
+	ret
+
+newfish
+	ld	a,(spritevar0)
+	ld	(spritex),a
+	xor	a
+	ld	(spriteframe),a
+	sla	a
+	sla	a
+	ld	(spritechar),a
+	call	dornd
+	ld	a,(random)
+	and	$3
+	inc	a
+	ld	(spritevar1),a
+	call	savespdata
+	ret
+
+platbrain0
+	call	getspdata
+	ld	b,platchar
+	ld	a,(frame)
+	and	$c
+	add	a,b
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,platpal
+	ld	(spriteatt),a
+
+	ld	hl,spritevar0
+	ld	a,(hli)
+	ld	h,(hl)
+	ld	l,a
+
+;	ld	hl,platpattern0
+
+	ld	a,(frame)
+	and	$1		;7
+	call	z,patterns
+	call	savespdata
+	call	drawsprite
+	call	spplat
+	ret
+
+
+checkbrain
+	call	getspdata
+	ld	a,(spriteframe)
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,checkpal
+	ld	(spriteatt),a
+	ld	a,(spriteframe)
+	cp	chkchar+8
+	call	nz,animcell
+	call	drawsprite
+	ld	a,(spriteframe)
+	cp	chkchar+8
+	call	nz,checkcol
+	ret
+
+tipbrain
+	call	getspdata
+	ld	a,(frame)
+	srl	a
+	srl	a
+	and	$4
+	add	a,tipchar
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,tippal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	tipcol
+	ret
+
+
+
+warpbrain
+	call	getspdata
+	ld	a,(gotfrog)
+	and	a
+	jr	z,notgot
+	inc	a
+	ld	(gotfrog),a
+	cp	$80
+	jr	nc,skipbabe
+	srl	a
+	srl	a
+	and	$1e
+	ld	hl,babytab
+	call	indexbya
+	ld	a,1
+	call	forcebank
+	ld	a,(hli)
+	ld	(spritechar),a
+	ld	a,(hl)
+	ld	(spriteatt),a
+	ld	a,2
+	ld	(spritewidth),a
+	call	drawsprite
+skipbabe
+
+				;do something with Frogger
+	ld	a,(gotfrog)
+	cp	$10
+	call	c,fixfrog
+	ld	a,(gotfrog)
+	cp	$60
+	ret	c
+;	srl	a
+;	srl	a
+	push	af
+	ld	a,1
+	call	forcebank
+	pop	af
+	sub	$60
+	srl	a
+	ld	hl,spinpoof
+	call	indexbya
+	ld	a,(hl)
+	ld	(frogframe),a	
+	ld	a,(frame)
+	and	1
+	ret	nz
+;	ld	a,(savefy)
+;	inc	a
+;	ld	(savefy),a
+;	ld	(frogy),a
+;	call	alive
+
+;	ld	a,(truey)
+;	sub	1
+;	ld	(truey),a
+;	ld	a,(truey+1)
+;	sbc	a,0
+;	ld	(truey+1),a
+	ret
+
+fixfrog
+
+	ld	a,(frogframe)
+	ld	b,a
+	and	7
+	ret	z		;not in a jumo
+	ld	a,b
+	dec	a
+	ld	(frogframe),a
+	ret	
+
+notgot
+	ld	a,babychar
+	ld	(spritechar),a
+	call	animcell
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,babypal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	z,warpcol
+	ret
+
+
+
+timebrain
+	call	getspdata
+	ld	a,moretimechar
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,hgpal
+	ld	(spriteatt),a
+	call	animcell
+	call	drawsprite
+	call	z,timecol
+	ret
+
+oneupbrain
+	call	getspdata
+	ld	a,oneupchar
+	ld	(spritechar),a
+	call	animcell
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,oneuppal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	z,oneupcol
+	ret
+
+
+
+contbrain
+	call	getspdata
+	ld	a,contchar
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,contpal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	z,contcol
+	ret
+
+
+
+
+
+
+ballbrain0
+	call	getspdata
+	ld	a,batchar
+	ld	(spritechar),a
+	call	animbat		;animcellfast
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,batpal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	getspdata
+	ld	a,(frame)
+
+	ld	b,a
+	ld	a,(spritevar0)
+	and	b
+
+;	and 	$7
+
+	call	z,moveball
+	call	savespdata
+	call	spcol
+	ret
+
+animbat
+l0
+	ld	a,(frame)
+	srl	a
+	srl	a
+	and	7
+	jp	samebat
+
+
+	and	0
+	jr	nz,samebat
+	ld	a,(spritevar1)
+	inc	a
+	cp	7
+	jr	c,l1
+	xor	a
+l1
+	ld	(spritevar1),a
+samebat
+	ld	hl,battab
+;	ld	a,(spritevar1)
+	call	indexbya
+	ld	a,(spritechar)
+	add	a,(hl)
+	ld	(spritechar),a
+	ret
+
+battab
+	db	0,4,8,$c,8,4,0,4,0,0,0,0,0,0,0,0,0
+
+moveball	
+l0
+	ld	a,(spritex)
+	and	$f
+	jr	nz,moveball1	;not starting new character move
+	ld	a,(spritey)
+	and	$f
+	jr	nz,moveball1
+	call	getspchar	;find character under sprite
+	srl	a
+	srl	a
+	ld	hl,floortab
+	call	indexbya
+	ld	a,(hl)
+	and	a
+	jr	z,moveball1	;regular floor
+	bit	fybit,a
+	jr	z,l1
+	call	flipdy
+	jr	moveball1
+l1
+	bit	fxbit,a
+	jr	z,l2
+	call	flipdx
+	jr	moveball1
+l2
+	bit	fbbit,a
+	jr	z,l3
+	call	flipdx		
+	call	flipdy		
+	jr	moveball1
+l3
+moveball1
+	call	spritelr
+	call	spriteud
+	ret
+
+;spider
+rturnbrain			;turn right at outside corner
+	call	getspdata
+	ld	a,spiderchar
+	ld	(spritechar),a
+	call	animcellfast
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,spiderpal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	getspdata
+	ld	a,(frame)
+	ld	b,a
+	ld	a,(spritevar1)
+	and	b
+	call	z,moverturn
+	call	savespdata
+	call	spcol
+	ret
+
+;spider
+lturnbrain			;turn right at outside corner
+	call	getspdata
+	ld	a,spiderchar		;spiderchar
+	ld	(spritechar),a
+	call	animcellfast
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,spiderpal
+	ld	(spriteatt),a
+	call	drawsprite
+	call	getspdata
+	ld	a,(frame)
+	ld	b,a
+	ld	a,(spritevar1)
+	and	b
+	call	z,movelturn
+	call	savespdata
+	call	spcol
+	ret
+
+
+
+
+turnright
+	ld	a,(spritevar0)
+	inc	a
+	and	3
+	ld	(spritevar0),a
+	ld	a,(spritedx)
+	and	a
+	jr	z,dxis0
+	ld	(spritedy),a
+	xor	a
+	ld	(spritedx),a
+	ret
+dxis0
+	ld	a,(spritedy)
+	xor	$ff
+	inc	a
+	ld	(spritedx),a
+	xor	a
+	ld	(spritedy),a
+	ret
+
+turnleft
+	ld	a,(spritevar0)
+	dec	a
+	and	3
+	ld	(spritevar0),a
+	ld	a,(spritedx)
+	and	a
+	jr	z,ldxis0
+	xor	$ff
+	inc	a
+	ld	(spritedy),a
+	xor	a
+	ld	(spritedx),a
+	ret
+ldxis0
+	ld	a,(spritedy)
+;	xor	$ff
+;	inc	a
+	ld	(spritedx),a
+	xor	a
+	ld	(spritedy),a
+	ret
+
+
+
+
+moverturn
+l0
+	ld	a,(spritex)
+	and	$f
+	jr	nz,moverturn1	;not starting new character move
+	ld	a,(spritey)
+	and	$f
+	jr	nz,moverturn1
+	call	getspchar	;find character under sprite
+	srl	a
+	srl	a
+	ld	b,a
+	ld	hl,floortab
+	call	indexbya
+	ld	a,(hl)
+    	bit 	ocbit,a
+	jr	z,l1
+	call	turnright
+	jr	moverturn1
+l1
+	bit	icbit,a
+	jr	z,l2
+	call	turnleft
+	jr	moverturn1
+l2
+	bit	fvbit,a
+	jr	z,l4
+	call	flipv
+	jr	moverturn1
+l4
+	bit	tcbit,a
+	jr	z,l5
+	call	tightcorner
+	jr	moverturn1
+l5
+	bit	fhbit,a
+	jr	z,l6
+	call	fliph
+	jr	moverturn1
+l6
+moverturn1
+	call	spritelr
+	call	spriteud
+	ret
+
+movelturn
+l0
+	ld	a,(spritex)
+	and	$f
+	jr	nz,movelturn1	;not starting new character move
+	ld	a,(spritey)
+	and	$f
+	jr	nz,movelturn1
+	call	getspchar	;find character under sprite
+	ld	b,a
+	srl	a
+	srl	a
+	ld	hl,floortab
+	call	indexbya
+	ld	a,(hl)
+    	bit 	ocbit,a
+	jr	z,l1
+	call	turnleft
+	jr	moverturn1
+l1
+	bit	icbit,a
+	jr	z,l2
+	call	turnright
+	jr	moverturn1
+l2
+	bit	fvbit,a
+	jr	z,l4
+	call	flipv
+	jr	moverturn1
+l4
+	bit	tcbit,a
+	jr	z,l5
+	call	tightcorner
+	jr	moverturn1
+l5
+	bit	fhbit,a
+	jr	z,l6
+	call	fliph
+	jr	moverturn1
+l6
+
+
+movelturn1
+	call	spritelr
+	call	spriteud
+	ret
+
+flipv
+	ld	a,(spritevar0)	;change direction 
+	xor	2		;was either 0 or 2
+	ld	(spritevar0),a
+	ld	a,(spritedy)
+	xor	$ff
+	inc	a
+	ld	(spritedy),a
+	ret
+
+
+fliph
+	ld	a,(spritevar0)	;change direction 
+	xor	1		;was either 1 or 3
+	ld	(spritevar0),a
+	ld	a,(spritedx)
+	xor	$ff
+	inc	a
+	ld	(spritedx),a
+	ret
+
+
+tightcorner		;swap dx and dy
+			; if h and v flip bits are the same
+			; then flip signs
+
+	ld	a,b
+	cp	29
+	jr	z,tc1
+	cp	32
+	jr	z,tc1
+
+
+tc0			
+	ld	a,(spritedx)
+	push	af
+	ld	a,(spritedy)
+	ld	(spritedx),a
+	pop	af
+	ld	(spritedy),a
+	ld	a,(spritevar0)	;direction
+	xor	3
+;	ld	(spritevar0),a
+	ret	
+tc1
+	ld	a,(spritedx)
+	push	af
+	ld	a,(spritedy)
+	xor	$ff
+	inc	a
+	ld	(spritedx),a
+	pop	af
+	xor	$ff
+	inc	a
+	ld	(spritedy),a
+	ld	a,(spritevar0)	;direction
+	xor	2
+;	ld	(spritevar0),a
+	ret	
+
+
+getspdata
+	ld	a,(saveptr)
+	and	$f0
+	or	spx	;index into it's x value
+	ld	l,a
+	ld	a,(saveptr+1)
+	ld	h,a
+	ld	de,spritex
+	ld	c,10
+	call	movehldec	;x, y, yi, frame, dir, count are set
+	ret
+
+savespdata
+	ld	a,(saveptr)
+	and	$f0
+	or	spx	;index into it's x value
+	ld	e,a
+	ld	a,(saveptr+1)
+	ld	d,a
+	ld	hl,spritex
+	ld	c,10
+	call	movehldec	;x, y, and yi are set
+	ret
+
+
+
+; on entry to init routines, de = bain pointer + 3 in spvar
+
+initsnake0
+	ld	hl,snakebrain0
+	call	stuffbrain
+	ld	a,(spritevar0)
+	call	stuffdx
+	ld	a,(spritevar1)
+	call	stuffspvar0
+	ret
+initsnake1
+	ld	hl,snakebrain1
+	call	stuffbrain
+	ld	a,1
+	call	stuffdx
+	ld	a,(spritevar0)
+	call	stuffspvar0
+	ld	a,(spritevar1)
+	call	stuffspvar1
+	ret
+
+
+initbee0
+	ld	hl,beebrain0
+	call	stuffbrain
+	call	stuffvar01
+	ret
+
+initfish
+	ld	hl,fishbrain0
+	call	stuffbrain
+	ld	a,2
+	call	stuffdx
+	ld	a,0
+	call	stuffframe
+	ld	a,(spritevar0)
+	call	stuffspvar0
+	ld	a,3
+	call	stuffspvar1	;delay/flip timer
+	ret
+
+
+initplat0
+	ld	hl,platbrain0
+	call	stuffbrain
+	call	stuffvar01
+	ret
+initcheck
+	ld	hl,checkbrain
+	call	stuffbrain
+	ld	a,chkchar
+	call	stuffframe
+	ret
+
+inittip
+	ld	hl,tipbrain
+	call	stuffbrain
+	ld	a,(spritevar0)	;number of tip (or 0 if = level #)
+	call	stuffspvar0
+	ret
+
+
+inittime
+	ld	a,(visit)
+	and	a
+	jp	nz,killcont
+	ld	hl,timebrain
+	call	stuffbrain
+	ret
+
+
+initoneup
+	ld	hl,oneupbrain
+	call	stuffbrain
+	ret
+
+
+initcont
+	ld	a,(visit)
+	and	a
+	jp	nz,killcont
+;	ld	a,(player)	;guest?
+;	cp	3
+;	jp	z,killcont
+	ld	a,(continue)
+	ld	b,a
+	ld	a,(level)
+	cp	b
+	jr	z,killcont
+	jr	c,killcont
+	ld	hl,contbrain
+	call	stuffbrain
+	ret
+killcont
+	ld	hl,dummybrain
+	call	stuffbrain
+
+dummybrain
+	ret
+
+
+initball0
+	ld	hl,ballbrain0
+	call	stuffbrain
+	ld	a,1
+	call	stuffdx
+	ld	a,1
+	call	stuffdy
+	ld	a,(spritevar0)	;speed (andmask)
+	call	stuffspvar0
+	ret
+
+initrturner
+	ld	hl,rturnbrain
+	call	stuffbrain
+	ld	a,(spritevar1)	;speed
+	call	stuffspvar1
+	ld	a,(spritevar0)	;initial direction
+	call	stuffspvar0
+	ld	hl,dxdytab
+	sla	a
+	call	indexbya
+	ld	a,(hli)
+	call	stuffdx
+	ld	a,(hl)
+	call	stuffdy
+	ret
+
+initlturner
+	ld	hl,lturnbrain
+	call	stuffbrain
+	ld	a,(spritevar1)	;speed
+	call	stuffspvar1
+	ld	a,(spritevar0)	;initial direction
+	call	stuffspvar0
+	ld	hl,dxdytab
+	sla	a
+	call	indexbya
+	ld	a,(hli)
+	call	stuffdx
+	ld	a,(hl)
+	call	stuffdy
+	ret
+
+
+
+dxdytab			;for directions 0,1,2,3
+
+	db	0,-1
+	db	1,0
+	db	0,1
+	db	-1,0
+
+
+
+stuffvar01		;put spritevar0 and spritevar1 
+			;into spvar0,1
+	ld	a,e
+	and	$f0
+	or	spvar0
+	ld	e,a
+	ld	a,(spritevar0)
+	ld	(de),a
+	inc	de
+	ld	a,(spritevar1)
+	ld	(de),a
+	ret
+
+stuffbrain
+	dec	de
+	dec	de
+	dec	de
+	dec	de
+	ld	a,l
+	ld	(de),a
+	inc	de
+	ld	a,h
+	ld	(de),a
+	inc	de
+	ret
+
+
+spritelr
+	ld	a,(spritedx)
+	push	hl
+	ld	hl,spritex
+	add	a,(hl)
+	ld	(hl),a
+	pop	hl
+	ret
+
+
+
+spriteud		    
+	push	hl
+	ld	a,(spritedy)
+	bit	7,a
+	jr	z,spritedown
+spriteup
+	ld	hl,spritey
+	add	a,(hl)
+	ld	(hl),a
+	ld	a,(spritedy)
+	cp	(hl)
+	jr	nz,spriteup1	;if dy = $ff and y = $ff, or both = $fe
+	inc	hl		;then need to do carry
+	dec	(hl)
+spriteup1
+	pop	hl
+	ret
+spritedown
+	ld	hl,spritey
+	add	a,(hl)
+	ld	(hli),a
+	jr	nc,spritedown1
+	inc	(hl)
+spritedown1
+	pop	hl
+	ret
+
+
+stuffdx
+	push	af
+	ld	a,e
+	and	$f0
+	or	spdx
+	ld	e,a
+	pop	af
+	ld	(de),a
+	ret
+
+stuffframe
+	push	af
+	ld	a,e
+	and	$f0
+	or	spframe
+	ld	e,a
+	pop	af
+	ld	(de),a
+	ret
+
+
+stuffdy
+	push	af
+	ld	a,e
+	and	$f0
+	or	spdy
+	ld	e,a
+	pop	af
+	ld	(de),a
+	ret
+
+stuffspvar0
+	push	af
+	ld	a,e
+	and	$f0
+	or	spvar0
+	ld	e,a
+	pop	af
+	ld	(de),a
+	ret
+
+stuffspvar1
+	push	af
+	ld	a,e
+	and	$f0
+	or	spvar1
+	ld	e,a
+	pop	af
+	ld	(de),a
+	ret
+
+snakespcol	;adjust for direction since only head is lethal
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(gothome)
+	and	a
+	ret	nz
+	ld	a,(spritedx)
+	bit	7,a
+	jr	nz,spcol	;head is on left when dx is negative
+	ld	a,(objx)
+	add	a,$10
+	ld	(objx),a
+spcol
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(gothome)
+	and	a
+	ret	nz
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,8+8		;4+8
+	cp	8*2
+	jr	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$10+8		;$10+4
+	cp	8*2
+	jr	nc,nospcol
+	jp	crush
+nospcol
+	ret
+spplat
+	ld	a,(jumpcount)
+	and	a
+	ret	nz
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(drewit)
+	and	a
+	ret	z
+
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$10
+	cp	$10
+	jr	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$10+4
+	cp	8
+	jr	nc,nospcol
+	call	doplat
+      	ret
+
+pickup
+	call	killsprite
+      	ret
+
+checkcol			;for checkpoints
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$16
+	cp	$1e
+	jr	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$10+4
+	cp	8
+	ret	nc
+	call	getspdata
+	ld	a,(spritex)
+	ld	(startingx),a
+	ld	a,(spritey)
+	sub	$10
+	ld	(startingy),a
+	ld	a,(spritey+1)
+	sbc	a,0
+	ld	(startingy+1),a
+	ld	a,chkchar+8
+	ld	(spriteframe),a
+	call	savespdata
+	ld	a,6
+	call	dosound
+      	ret
+
+timecol			;for checkpoints
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$16
+	cp	$1e
+	jp	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$10+4
+	cp	8
+	ret	nc
+	call	killsprite
+	call	initbar
+	ld	a,6
+	call	dosound
+	ret
+
+oneupcol			;for checkpoints
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$16
+	cp	$1e
+	jp	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$10+4
+	cp	8
+	ret	nc
+	call	killsprite
+	call	extraman
+	ld	a,6
+	call	dosound
+	ret
+
+
+killsprite
+	ld	hl,saveptr
+	ld	a,(hli)
+	ld	h,(hl)
+	ld	l,a
+	xor	a
+	ld	(hl),a
+	ret
+
+	if 0
+
+initstar		;hl = current brain
+	ld	de,starbrain
+	ld	a,e
+	ld	(hli),a
+	ld	a,d
+	ld	(hli),a
+	inc	hl
+	inc	hl
+	inc	hl
+	ld	a,starchar
+	ld	(hli),a
+	inc	hl
+	inc	hl
+	inc	hl
+	xor	a
+	ld	(hl),a
+	ret
+
+	endif
+contcol			;for checkpoints
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$16
+	cp	$1e
+	jp	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$10+4
+	cp	8
+	ret	nc
+	call	killsprite
+	ld	a,(level)
+	ld	(continue),a
+	call	savestats
+	ld	a,6
+	call	dosound
+	ret
+
+
+
+
+warpcol			;for checkpoints
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$16
+	cp	$1e
+	jp	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$16+9
+	cp	$1e
+	ret	nc
+	ld	a,1
+	ld	(gotfrog),a
+thislab
+	ld	a,$e0
+	ld	(gothome),a
+	call	killenemies
+	ld	a,2
+	call	dosong
+	ld	a,1
+	ld	(timedir),a
+	ld	bc,$0100	;one thousand
+	call	addscore
+	ret
+
+;	call	killsprite
+;	call	foundexit
+;	ret
+
+killenemies			;do better later
+	ld	hl,spvars	;point to brains
+	ld	c,$f
+	ld	de,$10
+	xor	a
+l0
+	ld	(hl),a
+	add	hl,de
+	dec	c
+	jr	nz,l0
+	ret
+
+doplat	   
+	ld	a,(falling)
+	and	a
+	jr	z,doplat1
+	cp	$1c
+	ret	c
+doplat1
+	call	getspdata
+	ld	a,(spritex)
+	ld	(truex),a
+	ld	a,(spritey)
+	sub	$10
+	ld	(truey),a
+	ld	a,(spritey+1)
+	sbc	a,0
+	ld	(truey+1),a
+
+	ld	a,(spritedx)
+	call	frogdx		;move him in x direction if platform has moved
+
+	ld	a,1
+	ld	(riding),a
+	xor	a
+	ld	(falling),a
+
+
+	ld	a,(spritedy)
+	and	a
+	ret	z
+	bit	7,a
+	jr	nz,frogdyneg
+frogdypos
+	ld	hl,truey
+	inc	(hl)
+	ret	nz
+	inc	hl
+	inc	(hl)
+	ret
+frogdyneg
+	ld	a,(truey)
+	sub	1
+	ld	(truey),a
+	ld	a,(truey+1)
+	sbc	a,0
+	ld	(truey+1),a
+	ret
+patterns	  	; hl = pattern
+	push	hl
+	ld	hl,spritecounter
+	ld	a,(hl)
+	inc	(hl)
+	swap	a
+	and	$0f
+	sla	a
+	pop	hl
+	call	indexbya
+	ld	a,(hli)
+	ld	(spritedx),a
+	call	spritelr
+	ld	a,(hl)
+	ld	(spritedy),a
+	call	spriteud
+	ret
+	
+
+beepattern0
+	db	1,1
+	db	1,1
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	-1,-1
+	db	-1,-1
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+
+beepattern1
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+
+	db	1,1
+	db	1,1
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	-1,-1
+	db	-1,-1
+
+
+beepattern2
+	db	0,-1
+	db	0,-1
+	db	0,-1
+	db	0,-1
+	db	0,-1
+	db	0,-1
+	db	0,-1
+	db	0,0
+	db	0,1
+	db	0,1
+	db	0,1
+	db	0,1
+	db	0,1
+	db	0,1
+	db	0,1
+	db	-1,0
+
+
+beet;	db	$a0
+;	dw	$1e0
+;	dw	beepattern2
+;	dw	initbee0
+
+patternw4a
+	db	0,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	0,0
+	db	0,1
+	db	0,1
+	db	0,1
+	db	0,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	0,0
+	db	0,-1
+	db	0,-1
+	db	0,-1
+
+
+patternw5a
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	0,1
+	db	0,1
+	db	1,0
+	db	0,-1
+	db	0,-1
+	db	1,0
+	db	-2,0
+	db	-2,0
+	db	-2,0
+	db	-2,0
+
+patternw5b
+	db	-1,0
+	db	-1,0
+	db	0,1
+	db	0,1
+	db	1,0
+	db	0,0
+	db	0,0
+	db	-1,0
+	db	0,-1
+	db	0,-1
+	db	1,0
+	db	1,0
+	db	0,0
+	db	0,0
+	db	0,-1
+	db	0,1
+
+;	db	0,-1
+;	db	1,0
+;	db	0,0
+;	db	0,0
+;	db	0,1
+;	db	1,0
+
+
+patternw5c
+	db	0,1
+	db	0,1
+	db	1,0
+	db	1,0
+	db	0,-1
+	db	0,-1
+	db	-1,0
+	db	-1,0
+	db	0,2
+	db	2,0
+	db	0,-2
+	db	-2,0
+	db	0,2
+	db	2,0
+	db	0,-2
+	db	-2,0
+
+
+patternw5ca
+	db	0,-1
+	db	0,-1
+	db	-1,0
+	db	-1,0
+	db	0,1
+	db	0,1
+	db	1,0
+	db	1,0
+	db	0,-2
+	db	-2,0
+	db	0,2
+	db	2,0
+	db	0,-2
+	db	-2,0
+	db	0,2
+	db	2,0
+
+
+patternw5d
+	db	-2,0
+	db	4,0
+	db	-2,0
+	db	4,0
+	db	-2,0
+	db	4,0
+	db	0,2
+	db	1,0
+	db	-1,0
+	db	0,-2
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+
+patternw5e
+	db	-1,0
+	db	0,-1
+	db	0,-1
+	db	-1,0
+	db	1,0
+	db	0,1
+	db	1,0
+	db	0,1
+	db	0,-1
+	db	1,0
+	db	1,0
+	db	0,1
+	db	0,-1
+	db	-1,0
+	db	-1,0
+	db	0,1
+patternw5f
+	db	-2,0
+	db	-2,0
+	db	4,0
+	db	1,0
+	db	1,0
+	db	0,1
+	db	0,1
+	db	-1,0
+	db	-1,0
+	db	0,1
+	db	1,0
+	db	0,-1
+	db	1,0
+	db	0,-2
+	db	-1,0
+	db	-1,0
+patternw5g
+	db	-1,0
+	db	1,0
+	db	-2,2
+	db	2,-2
+	db	0,2
+	db	0,-2
+	db	1,1
+	db	-1,-1
+	db	1,0
+	db	-1,0
+	db	0,0	
+	db	0,0	
+	db	0,0	
+	db	0,0	
+	db	0,0	
+	db	0,0	
+
+
+
+
+platpattern0
+	db	0,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	0,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+
+platpattern1
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+
+
+
+platpattern2
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+
+
+
+
+	if	0
+
+platpattern0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	0,0
+	db	0,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	1,0
+	db	0,0
+	db	0,0
+	db	0,0
+	db	0,0
+platpattern1
+	db	0,0
+	db	0,0
+	db	1,0
+	db	0,0
+	db	1,0
+	db	0,0
+	db	1,0
+	db	0,0
+	db	1,0
+	db	0,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	-1,0
+	db	0,0
+	db	0,0
+
+	endif
+
+testlimits		;a = dx, spritevar0, spritevar1 = x limits
+	bit	7,a
+	jr	nz,testleftlim
+	ld	a,(spritevar1)
+	ld	b,a
+	ld	a,(spritex)
+	cp	b
+	jr	z,flipdx
+	ret
+testleftlim
+	ld	a,(spritevar0)
+	ld	b,a
+	ld	a,(spritex)
+	cp	b
+	jr	z,flipdx
+	ret
+flipdx
+	ld	a,(spritedx)
+	xor	$ff
+	inc	a
+	ld	(spritedx),a
+	ret
+flipdy
+	ld	a,(spritedy)
+	xor	$ff
+	inc	a
+	ld	(spritedy),a
+	ret
+
+
+adjustx
+	ld	a,(spritey+1)
+	swap	a
+	ld	b,a
+	ld	a,(spritey)	
+	and	$f0
+	swap	a
+	or	b	;this is snake's lane
+	dec	a	;sprites are drawn higher than their location
+	ld	hl,xlane
+	call	indexbya
+	ld	a,(hl)
+	ld	b,a
+	ld	a,(spritex)
+	sub	b
+	ld	(spritex),a
+	ret
+
+getspchar			;find character under sprite
+	ld	h,$c8		;get x/8 +(y*32)
+	ld	a,(spritex)
+	srl	a
+	srl	a
+	srl	a
+	ld	l,a
+	ld	a,(spritey)
+	and	$f0
+	sub	$10
+	ld	e,a
+	ld	a,(spritey+1)
+	sbc	a,0
+	ld	d,a
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	ld	a,(hl)	
+	ret
+
+getwallchar			;find character in direction sprite wants to turn
+l0
+	ld	h,$c8		;get x/8 +(y*32)
+	ld	a,(spritex)
+	ld	b,a
+	ld	a,(spritevar0)	;direction
+	cp	0
+	jr	nz,l1
+	ld	a,$10
+	add	a,b
+	ld	b,a
+	jr	l2
+l1
+	cp	2
+	jr	nz,l2
+	ld	a,b
+	sub	$10
+	ld	b,a
+l2
+	ld	a,b
+	srl	a
+	srl	a
+	srl	a
+	ld	l,a
+	ld	a,(spritey)
+	sub	$10
+	ld	e,a
+	ld	a,(spritey+1)
+	sbc	a,0
+	ld	d,a
+	ld	a,(spritevar0)
+	cp	1
+	jr	nz,l3
+	ld	a,$10
+	add	a,e
+	ld	e,a
+	ld	a,d
+	adc	a,0
+	ld	d,a
+	jr	l4
+l3
+	cp	3
+	jr	nz,l4
+	ld	a,e
+	sub	$10
+	ld	e,a
+	ld	a,d
+	sbc	a,0
+	ld	d,a
+l4
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	ld	a,(hl)	
+	ret
+
+getlwallchar			;find character in direction sprite wants to turn
+l0
+	ld	h,$c8		;get x/8 +(y*32)
+	ld	a,(spritex)
+	ld	b,a
+	ld	a,(spritevar0)	;direction
+	cp	2
+	jr	nz,l1
+	ld	a,$10
+	add	a,b
+	ld	b,a
+	jr	l2
+l1
+	cp	0
+	jr	nz,l2
+	ld	a,b
+	sub	$10
+	ld	b,a
+l2
+	ld	a,b
+	srl	a
+	srl	a
+	srl	a
+	ld	l,a
+	ld	a,(spritey)
+	sub	$10
+	ld	e,a
+	ld	a,(spritey+1)
+	sbc	a,0
+	ld	d,a
+	ld	a,(spritevar0)
+	cp	3
+	jr	nz,l3
+	ld	a,$10
+	add	a,e
+	ld	e,a
+	ld	a,d
+	adc	a,0
+	ld	d,a
+	jr	l4
+l3
+	cp	1
+	jr	nz,l4
+	ld	a,e
+	sub	$10
+	ld	e,a
+	ld	a,d
+	sbc	a,0
+	ld	d,a
+l4
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	add	hl,de
+	ld	a,(hl)	
+	ret
+
+initwarp
+	ld	a,(frogy)
+	ld	(savefy),a
+	xor	a
+	ld	(gotfrog),a
+	ld	a,1
+	ld	(warpsp+spstat),a
+	ld	hl,warpbrain
+	ld	a,l
+	ld	(warpsp+spbrain),a
+	ld	a,h
+	ld	(warpsp+spbrain+1),a
+	ld	a,(level)
+	ld	b,0
+l0
+	sub	7
+	jr	c,l1
+	inc	b
+	jr	l0
+l1
+	ld	a,b
+	sla	a  
+	sla	a
+	ld	hl,warplocs
+	call	indexbya
+	ld	de,warpsp+spx
+	ld	c,4
+	call	movehldec
+	call	wait_vb
+	call	dolittle
+	ret
+
+warplocs	;x, ylo, yhi, frame
+
+	db	$40
+	dw	$1d0
+	db	babychar
+
+	db	$30
+	dw	$140
+	db	babychar
+
+
+	db	$40
+	dw	$1c0
+	db	babychar
+
+	db	$e0
+	dw	$150
+	db	babychar
+
+	db	$50
+	dw	$1c0
+	db	babychar
+
+tipcol
+	ld	a,(drewit)
+	and	a
+	ret	z
+	ld	a,(dying)
+	and	a
+	ret	nz
+
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(frogx)
+	sub	b
+	add	a,$20
+	cp	$31
+	jp	nc,nospcol
+	ld	a,(objy)
+	ld	b,a
+	ld	a,(frogy)
+	sub	b
+	add	a,$20
+	cp	$31
+	ret	nc
+	ld	a,(trg1)
+	and	buta+butb
+	ret	z
+	ld	a,21
+	call	dosound
+	call	showtip
+	ret
+
+showtip
+	call	clr9c
+	ld	a,1
+	call	forcebank
+	
+	ld	a,(spritevar0)
+	and	a
+	jr	nz,gettip
+regtip
+	ld	a,(level)
+	jr	gettip
+gettip
+	sla	a
+	ld	hl,0+tiptab
+	call	indexbya
+	call	stuffhl
+	call	writetip
+	call	wait_vb
+	ld	a,$80+$60
+	ld	(lcdc),a
+l0
+	ld	a,(wy)
+	and	$f
+	cp	8
+	call	nz,clickit
+	call	wait_vb
+	call	keycheck
+	ld	a,(wy)
+	dec	a
+	dec	a
+	dec	a
+	dec	a
+
+	ld	(wy),a
+	and	a
+	jr	nz,l0
+l0
+	call	wait_vb
+	call	keycheck
+	call	coldstart
+	ld	a,(trg1)
+	and	BUTA+BUTB
+	jr	nz,l0
+l0
+	call	wait_vb
+	call	keycheck
+	call	coldstart
+	ld	a,(trg1)
+	and	BUTA+BUTB
+	jr	z,l0
+
+l0
+	ld	a,(wy)
+	and	$1f
+	cp	8
+	call	nz,clickit
+
+	call	wait_vb
+	call	keycheck
+	ld	a,(wy)
+	inc	a
+	inc	a
+	inc	a
+	inc	a
+
+	ld	(wy),a
+	cp	$80
+	jr	nz,l0
+
+	ld	a,$80+$63
+	ld	(lcdc),a
+;	ld	a,$80
+;	ld	(wy),a
+	ret
+
+
+clickit
+	ld	a,8
+	jp	dosound
+
+
+
+writetip
+	ld	de,$9c60
+writetip1
+l0
+	ld	a,(hli)
+	and	a
+	ret	z
+	cp	$d
+	jr	nz,l1
+	ld	a,e
+	and	$e0
+	add	a,$20
+	ld	e,a
+	jr	nc,l2
+	inc	d
+l2
+	jr	l0				;store it
+l1
+	add	a,ALPHASTART2-"!"+1
+	push	af
+l3
+	ld	a,(stat)
+	bit	1,a
+	jr	nz,l3
+	pop	af
+	ld	(de),a
+	inc	de
+	jr	l0
+	ret
+
+clr9c
+	ld	hl,$9c60
+l0
+	ld	a,(stat)
+	bit	1,a
+	jr	nz,l0
+	ld	a,4
+	ld	(hli),a
+	ld	a,h
+	cp	$a0
+	jr	nz,l0
+	ret
+	
+
+oc	equ	1  	;outside corner
+ic	equ	2	;inside corner
+fx	equ	4	;flip dx
+fy	equ	8	;flip dy
+fb	equ	$10	;flip both
+fh	equ	$20	;flip h vector
+fv	equ	$40	;flip v vector
+tc	equ	$80	;tight corner
+
+ocbit	equ	0
+icbit	equ	1
+fxbit	equ	2
+fybit	equ	3
+fbbit	equ	4
+fhbit	equ	5
+fvbit	equ	6
+tcbit	equ	7
+
+floortab	;for treasure room characters
+
+	db	0,0,fy,fx,fb+oc,ic+fb,0,0
+	db	ic+fy,ic,ic,0,fy,0,fv,0
+	db	fh,fx,fb+oc,fb+oc,fb+oc,ic+fb,fv,fh
+	db	0,0,0,0,0,tc,tc,tc
+	db	tc,ic+fy,ic,fh,fh,ic+fb,ic+fb
+	db	0,0,0,0,0,0,0,0,0,0
+
+	if 	0
+
+starbrain		;starburst
+l0
+	call	getspdata
+	ld	hl,spritecounter
+	inc	(hl)
+	ld	a,(hl)
+	and	3
+	jr	nz,l1
+	ld	hl,spriteframe
+	inc	(hl)
+	ld	a,(hl)
+	cp	starend
+	jp	z,killsprite
+l1
+	call	savespdata
+	ld	a,(spriteframe)
+	sla	a
+	sla	a
+	ld	(spritechar),a
+	ld	a,2
+	ld	(spritewidth),a
+	ld	a,starpal
+	ld	(spriteatt),a
+	call	drawsprite
+	ret
+
+	endif
+

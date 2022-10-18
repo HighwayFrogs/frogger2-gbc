@@ -1,0 +1,61 @@
+;space (stars?)
+doripples
+	xor	a
+	ld	(vbk),a
+	ld	hl,ripples	;buffer for eight ripples
+	ld	a,(frame)	;use the frame count to tep through it
+	and	7
+	call	indexbya
+	ld	b,1
+l0
+	ld	a,(hl)		;get one to erase
+	call	clearripple	;erase it
+	ld	a,(hl)		;bump this one in a prime fashio
+	add	a,31
+	ld	(hli),a		;save it for next time around (8 frames later)
+	call	newripple
+	dec	b
+	jr	nz,l0
+	ret
+
+clearripple
+	ld	e,a
+	ld	d,$8f	;ripple font is at $8f00 
+	xor	a
+	call	screenwriteb1
+	inc	de
+	inc	de
+;	call	screenwriteb1
+	ret
+newripple
+	ld	e,a
+	ld	d,$8f	;ripple font is at $8f00
+	ld	a,(ripplecnt)
+	inc	a
+l0
+	cp	14
+	jr	c,l1
+	xor	a
+l1
+	ld	(ripplecnt),a
+	push	hl
+	ld	hl,ripplebits
+	call	indexbya
+	ld	a,(hl)
+	pop	hl
+	call	screenwriteb1
+	inc	de
+	inc	de
+	rl	a
+	rlc	a
+;	call	screenwriteb1
+	ret
+
+ripplebits
+
+	db	$80,$20,$08,$02
+	db	$80,$20,$08,$02
+	db	$80,$20,$08,$02
+	db	$80,$20,$08,$02
+
+

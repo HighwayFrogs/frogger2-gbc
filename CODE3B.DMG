@@ -1,0 +1,320 @@
+showrecords
+	ld	hl,0+recordspmf
+	call	0+getpmf
+	ld	hl,0+icons	;get icons for statistics
+	ld	de,iconsloc
+	ld	bc,$210
+	call	movehldebc
+	ld	hl,0+iconspal
+	call	getpal
+; now write the records
+	ld	b,5	;4 rows
+	ld	hl,stats
+	ld	de,$9884-$21+3
+l0
+	ld	c,7	;7 levels per row
+	ld	a,b
+	cp	1
+	jr	nz,l1
+	ld	c,4
+l1
+	ld	a,(hli)
+	and	a	;not yet visited
+	jr	nz,l4
+	ld	a,8
+	jr	l5	;get icon for unvisited spot
+
+l4
+	and	$7
+l5
+	sla	a	;character and attributes
+	push	hl
+	push	de
+	ld	hl,icontab
+	call	indexbya	
+	ld	a,(hli)
+	ld	(de),a
+	add	a,2
+	inc	e
+	ld	(de),a
+	dec	a
+	push	af
+	ld	a,e
+	add	a,$1f
+	ld	e,a
+	ld	a,d
+	adc	a,0
+	ld	d,a
+	pop	af
+	ld	(de),a
+	add	a,2
+	inc	e
+	ld	(de),a
+	pop	de
+	push	de
+	ld	a,1
+	ld	(vbk),a
+	ld	a,(hl)	;attribute
+	ld	(de),a
+	inc	de
+	ld	(de),a	
+	push	af
+	ld	a,e
+	add	a,$1f
+	ld	e,a
+	ld	a,d
+	adc	a,0
+	ld	d,a
+	pop	af
+	ld	(de),a
+	inc	de
+	ld	(de),a
+	xor	a
+	ld	(vbk),a
+
+	pop	de
+	pop	hl
+	ld	a,e
+	add	a,2
+	ld	e,a
+	dec	c
+	jr	nz,l1
+
+	ld	a,e
+	add	a,$52
+	ld	e,a
+	jr	nc,l3
+	inc	d
+l3
+	dec	b
+	jr	nz,l0
+	ret
+
+
+getpmf
+			;hl = start of palette
+	
+	ld	de,$ff68	;palette address register
+	ld	a,$80
+	ld	(de),a		;start at palette 0, auto increment
+
+	ld	de,$ff69	;palette data register
+	ld	b,$40		;64 bytes of data
+l0
+	ld	a,(hli)
+	ld	(de),a
+	dec	b
+	jr	nz,l0
+;getmap	   		;hl = start of map
+	xor	a
+	ld	($ff4f),a
+	ld	de,$9800
+	ld	bc,32*32
+	call	block_move1
+;getattrib		;hl = start of attribute block
+	ld	a,1
+	ld	($ff4f),a
+	ld	de,$9800
+	ld	bc,32*32
+	call	block_move1
+	xor	a
+	ld	($ff4f),a
+	inc	hl	;skip font size for now and just move large blocks
+	ld	de,$9000
+	ld	bc,$800
+	call	block_move1
+	ld	de,$8800
+	ld	bc,$800
+	call	block_move1
+	ret
+
+block_move1
+l0
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec	bc	
+	ld	a,b
+	or	c
+	jr	nz,l0
+	ret
+
+
+
+eggcode
+	call	lcd_off
+	call	clearscreen
+	ld	a,(special)
+	or	1
+	ld	(special),a
+	call	savestats
+	ld	a,1
+	ld	(vbk),a
+	ld	hl,rcset
+	ld	de,csetloc2
+	ld	bc,$3b0
+	call	movehldebc
+	xor	a
+	ld	hl,$9000
+	ld	c,16
+	call	zerohlc
+	ld	hl,$9800
+l0
+	ld	a,8
+	ld	(hli),a
+	ld	a,h
+	cp	$9c
+	jr	nz,l0
+
+	ld	hl,0+rsprites
+	call	getspal
+	ld	hl,0+rsprites+$40
+	xor	a	;load all 256
+	call	getsfont1
+
+	xor	a
+	ld	(vbk),a
+
+
+	ld	hl,0+rpal+$8
+	call	getpal
+
+	
+	ld	hl,welcome
+	ld	de,$9800
+	call	writehitext
+	xor	a
+	ld	(eggsound),a
+	ld	(eggsprite),a
+	call	recsprite
+	ld	a,$50
+	ld	(oamshad+1),a
+	ld	(oamshad+9),a
+	add	a,8
+	ld	(oamshad+5),a
+	ld	(oamshad+$d),a
+	ld	a,$88
+	ld	(oamshad),a
+	ld	(oamshad+4),a
+	add	a,8
+	ld	(oamshad+8),a
+	ld	(oamshad+$c),a
+	
+
+	ld	a,3
+	ld	(lcdc),a
+	call	lcd_on
+eggloop
+	call	wait_vb
+	call	keycheck
+	ld	a,(trg1)
+	bit	bitbuta,a
+	call	nz,dorsound
+	ld	a,(trg1)
+	bit	bitbutb,a
+	call	nz,dorsprite
+	ld	a,(trg1)
+	and	start
+	jr	z,eggloop
+	ld	a,(soundflag)
+	and	a
+	jp	nz,dorecords
+	ld	a,startsnd
+	call	recsounds
+	jp	dorecords
+
+dorsound
+	ld	a,(eggsound)
+	inc	a
+	cp	20
+	jr	c,dorsound1
+	ld	a,1
+dorsound1
+	ld	(eggsound),a
+	ld	a,(eggsound)
+	call	recsounds
+	ret
+
+dorsprite
+	ld	a,(eggsprite)
+	inc	a
+	cp	51
+	jr	c,dorsprite1
+	xor	a
+dorsprite1
+	ld	(eggsprite),a
+recsprite
+	ld	a,(eggsprite)
+	sla	a
+	sla	a
+	ld	(oamshad+2),a
+	inc	a
+	ld	(oamshad+$a),a
+	inc	a
+	ld	(oamshad+6),a
+	inc	a
+	ld	(oamshad+$e),a
+	ld	a,(eggsprite)
+	ld	hl,paltab
+	call	indexbya
+	ld	a,(hl)
+	ld	(oamshad+3),a
+	ld	(oamshad+7),a
+	ld	(oamshad+$b),a
+	ld	(oamshad+$f),a
+	ret
+
+
+
+welcome
+;		;0123456789abcdef0123
+	db	"  CONGRATULATIONS!",$d
+	db	"    YOU FOUND MY",$d 
+	db	"    SECRET PLACE.",$d
+	db	"     YOU WIN AN",$d
+	db	"     EXTRA LIFE.",$d,$d
+	db	"   PRESS A TO HEAR",$d
+	db	"     GAME SOUNDS.",$d,$d
+	db	"   PRESS B TO SEE",$d
+	db	" SOME GAME GRAPHICS.",$d,$d
+	db	"  PRESS START TO GO",$d
+	db	"   BACK TO RECORDS.",0
+
+paltab
+	db	8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
+	db	8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
+	db	8,8,8
+	db	9,9,9
+	db	$a,$a
+	db	$b,$b
+	db	$c,$c,$c
+	db	$d
+	db	$c,$c
+	db	9,9,9,9
+
+
+eggcode1
+	ld	a,(player)
+	cp	2
+	ret	nz
+	ld	a,(visit)
+	and	a
+	ret	nz
+	ld	de,playername
+	ld	hl,frogname
+	ld	c,8
+l0
+	ld	a,(de)
+	cp	(hl)
+	ret	nz
+	inc	de
+	inc	hl
+	dec	c
+	jr	nz,l0
+	ld	bc,$1000
+	jp	addscore
+
+
+frogname
+	db	"FROGGER  "
+

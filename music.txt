@@ -1,0 +1,18 @@
+<HTML><FONT  SIZE=3 PTSIZE=10>ROM bank: $20<BR>
+RAM are: $DB00 (64 bytes)<BR>
+<BR>
+Jump addresses to execute sound functions:<BR>
+<BR>
+	jp	$4000		;Start tune (tune # in B register, tune #0 stops music)<BR>
+	jp	$4003		;Start sound (sound # in B register, sound #0 stops sounds)<BR>
+	jp	$4006		;Poll sound (call once per frame)<BR>
+	jp	$4009		;Pause sound<BR>
+	jp	$400C		;Resume sound (un-pause)<BR>
+<BR>
+The present file contains:<BR>
+<BR>
+Tune #1: Long, repeating tune<BR>
+Tune #2: Single-note non-repeating tune (a middle C)<BR>
+<BR>
+Sounds #1..14: Various sound effects. (#1 through #4 are similar, the rest are distinct)<BR>
+</HTML>

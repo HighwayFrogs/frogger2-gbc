@@ -1,0 +1,181 @@
+lcdcirq
+	push	af
+	push	hl
+	push	bc
+
+	ld	a,(world)
+	cp	rworld
+	jr	nz,noirq
+
+
+; index scroll value (from ram) and next LYC value (from table
+
+	ld	hl,lanecount
+	ld	a,(hl)
+	inc	(hl)
+	ld	b,(hl)
+	ld	hl,xlane
+	add	a,l
+	ld	l,a
+	ld	a,(hl)
+	ld	hl,STAT
+	
+L0	bit	1,(hl)
+	jr	nz,L0	 
+	ld	(scx),a
+	ld	hl,lytab
+	ld	a,b
+	add	a,l
+	jr	nc,l9
+	inc	h
+l9
+	ld	l,a
+	ld	a,(hl)
+	ld	(LYC),a
+
+noirq
+	pop	bc
+	pop	hl
+	pop	af
+	
+	reti
+
+
+movecars
+l0
+	ld	a,(lanetime+7)	       ;top car
+	and	a
+	jr	z,l1
+	dec	a
+	ld	(lanetime+7),a
+	jr	nz,l1
+	ld	a,(lanespd+7) 	;timed out, restore
+	ld	(lanetime+7),a	
+				; and do scroll
+	ld	a,(xlane+6)
+	inc	a
+	ld	(xlane+6),a
+l1				       ;fast car
+	ld	a,(lanespd+8)
+	ld	hl,xlane+7
+	add	a,(hl)
+	ld	(hl),a
+l2
+	ld	a,(lanetime+9)		;car
+	and	a
+	jr	z,l3
+	dec	a
+	ld	(lanetime+9),a
+	jr	nz,l3
+	ld	a,(lanespd+9) 	;timed out, restore
+	ld	(lanetime+9),a	
+				; and do scroll
+	ld	a,(xlane+8)
+	inc	a
+	ld	(xlane+8),a
+l3
+	ld	a,(lanetime+$a)		;car
+	and	a
+	jr	z,l4
+	dec	a
+	ld	(lanetime+$a),a
+	jr	nz,l4
+	ld	a,(lanespd+$a) 	;timed out, restore
+	ld	(lanetime+$a),a	
+				; and do scroll
+	ld	a,(xlane+9)
+	dec	a
+	ld	(xlane+9),a
+l4
+	ld	a,(lanetime+$b)		;fifth car (not in right now)
+	and	a
+	jr	z,l5
+	dec	a
+	ld	(lanetime+$b),a
+	jr	nz,l5
+	ld	a,(lanespd+$b) 	;timed out, restore
+	ld	(lanetime+$b),a	
+				; and do scroll
+	ld	a,(xlane+$a)
+	inc	a
+	ld	(xlane+$a),a
+l5
+
+
+
+
+
+xscout
+	ret
+
+
+clearlanes
+	xor	a
+	ld	hl,xlane
+	ld	b,NUMLANES
+l0
+	ld	(hli),a
+	dec	b
+	jr	nz,l0
+	ret
+
+initlanes
+	ld	a,(level)
+	and	7
+	sla	a
+	sla	a
+	sla	a
+	sla	a	;*16
+	ld	hl,speedtab	;speed for each lane
+	add	a,l
+	ld	l,a
+	jr	nc,init1
+	inc	h
+init1	ld	de,lanespd
+	ld	bc,lanetime
+	ld	a,NUMLANES
+l0
+	push	af
+	ld	a,(hli)
+	ld	(de),a
+	ld	(bc),a
+	inc	de
+	inc	bc
+	pop	af
+	dec	a
+	jr	nz,l0
+	ret
+
+speedtab		;lane speeds for each level (padded to 16 bytes)
+
+	db	$00,$06,$06,$04,$05,$06,$00,$03,$ff,$04,$04,$04,0,0,0,0
+	db	$00,$05,$05,$04,$05,$06,$00,$03,$ff,$04,$04,$04,0,0,0,0
+	db	$00,$05,$05,$04,$05,$06,$00,$03,$fe,$04,$04,$04,0,0,0,0
+	db	$00,$05,$05,$03,$05,$06,$00,$03,$fe,$04,$03,$04,0,0,0,0
+	db	$00,$04,$05,$03,$05,$06,$00,$03,$fe,$04,$03,$04,0,0,0,0
+	db	$00,$03,$05,$02,$05,$06,$00,$02,$fe,$03,$02,$04,0,0,0,0
+	db	$00,$03,$05,$02,$05,$06,$00,$02,$fe,$03,$02,$03,0,0,0,0
+	db	$00,$02,$06,$01,$05,$06,$00,$02,$fd,$03,$01,$03,0,0,0,0
+
+ 
+
+
+lytab		;table of lane y values for irq for ROAD GAME
+
+	db	$17
+	db	$1f
+	db	$27
+	db	$2f
+	db	$37
+	db	$3f
+	db	$47
+	db	$4f
+	db	$57
+	db	$5f
+	db	$67
+	db	$6f
+	db	$17
+	db	$0
+
+
+

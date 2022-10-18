@@ -1,0 +1,13 @@
+	ld	a,(screeny)
+	srl	a
+	and	$0f
+	add	a,a
+	add	a,a
+	add	a,l
+	ld	l,a
+	jr	nc,hok7
+	inc	h
+hok7
+				;y scroll of background at
+				;1/2 foreground rate
+

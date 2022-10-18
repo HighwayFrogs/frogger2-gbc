@@ -1,0 +1,61 @@
+;********************
+;*** Main Program ***
+;********************
+
+
+main
+	call	keycheck
+
+
+	if devel
+	call	develcode		;development stuff
+	endif
+
+; game code calls go here
+
+	call	gamecode
+
+vbwtlp	
+	halt			;Stop processor clock until interrupt
+	ld      a,(vbflag)	;Wait for v-blank
+	and     a
+	jr      z,vbwtlp
+	xor	a
+	ld	(vbflag),a
+	ld	hl,frame
+	inc	(hl)
+
+
+
+;Vertical blank processing
+
+; calls made during vblank (after interrupt) go here
+
+endmain
+	jp	main
+
+
+coldstart
+	ld	a,(cnt1)
+	cp	$0f
+	ret	nz
+	call	lcd_off
+	ld	a,1
+	ld	(firststart),a	;not a cold start
+	xor	a
+	call	dosound
+	xor	a
+	call	dosong
+	ld	a,(soundflag)
+	ld	(saveflag),a
+	ld	a,(player)
+	ld	(saveplayer),a
+	jp 	restart
+
+;	call	wait_vb
+;	call	read_keys
+;	ld	a,(cnt1)
+;	cp	$f
+;	jr	z,l0	
+;	jp 	restart
+

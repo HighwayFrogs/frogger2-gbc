@@ -1,0 +1,90 @@
+addten
+	ld	bc,$0001
+addscore			;add bc to score (padded with one zero)
+	ld	a,(score)
+	ld	d,a		;save this digit to check for extra man
+	ld	a,c
+	and	$f
+	ld	hl,score+3
+	add	a,(hl)
+	ld	(hl),a		;sta score+5
+	ld	a,c
+	swap	a
+	and	$f
+	dec	hl
+	add	a,(hl)
+	ld	(hl),a		;sta score+4
+	ld	a,b
+	and	$f
+	dec	hl
+	add	a,(hl)
+	ld	(hl),a		;sta score+3
+	ld	a,b
+	swap	a
+	and	$f
+	dec	hl
+	add	a,(hl)
+	ld	(hl),a		;sta score+2
+adscor3
+	ld	b,3		;ripple carry
+	ld	hl,score+3
+adscor1	ld	a,(hl)		;lda score,x
+	cp	10
+	jr	c,adscor2
+	sub	10
+	ld	(hl),a		;sta score,x
+	dec	hl
+	inc	(hl)		;inc score-1,x
+	inc	hl
+adscor2	dec	hl
+	dec	b
+	jr	nz,adscor1
+				;test for wrap
+	ld	a,(score)
+	cp	d		;highest digit the same as before?
+	ret	z		;yup
+	cp	10
+	jr	nc,maxscore
+				;bonus every 10,000
+	ld	hl,menleft
+	inc	(hl)
+	call 	drawmen
+	ret	
+maxscore
+	ld	a,9
+	ld	(score),a
+	ld	(score+1),a
+	ld	(score+2),a
+	ld	(score+3),a
+	ret
+
+drawmen
+	ret
+
+drawscore
+	ld	de,scoreloc
+	ld	b,0
+	ld	c,b
+	ld	hl,SCORE  
+FILTX2	ld	a,(hli)    
+	and	a         
+	jr	nz,FLTX2A 
+	bit	0,c       
+	jr	z,pblnk
+FLTX2A	add	a,ZEROCHAR
+	set	0,c       
+	jr	fltx2b
+pblnk	ld	a,0	;blank
+FLTX2B	ld	(de),a   
+	inc	de        
+	inc	b         
+	ld 	a,b       
+	cp 	3  ;5    
+	jr 	c,FILTX2  
+	set	0,c       
+	cp 	3  ;5    
+	jr 	z,FILTX2  
+nscrdsp		   
+	ret
+
+

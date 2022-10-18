@@ -1,0 +1,110 @@
+Demo controls
+
+START will move you through the worlds.
+Hold B to become invulnerable.
+The levels in World 0 are just roughed out right now.  
+Those that aren't started yet are just repeats of level 0.  
+I haven't started really laying out the sprites yet.  I just threw
+some in so you could see them.  
+
+In World 1, the player just has to collect all the gems to unlock
+the door (or make it appear).  That's not working yet.
+
+World 2 will have some form of tall, rolling objects (see the crude
+font I included).  It will also have some other terrain.
+
+World 3 will be ice caverns.  Part of it will have something similar to
+the logs in the river.  The other part will be ground, a lot of which is
+frozen, with some small clear spots to stand on.  
+
+World 4 hasn't been worked out yet.  We need something cool.
+
+World 5 will be the tram cars.  Right now, the player can ride the cars,
+but that's going to change.  The cars will be deadly and the road will be safe.
+
+Global Palettes
+
+Status area
+Only 3 colors available for each palette in the status area.  
+(Can't use first color.)
+We'll probably want to keep 2 palettes for this area. 
+These palettes (including the first color) can also be used in any of 
+the worlds.  To keep them out of the way, I put them at the end
+(palettes 6 and 7).
+
+The status area can be done any way you think looks good.
+The only requirements are: 
+room for at least 5 digits for score
+room for 8 characters for the timer bar
+room for at least five men (frogs)
+
+Local palettes
+
+World 0
+Palette 0 -- The water palette has to be blue and three whites.  
+I need that for the ripple effect.
+
+Palette 1 -- Turtles
+
+Palette 2 -- Logs
+
+Palette 3 -- Grass
+
+Palette 4 -- Road and cars.  If the gray was moved to the first color, we
+could make the cars pass over the gems.  This would look cool.  (It would
+also require a switch in the other palette used for trucks.)
+
+Palette 5 -- Available (could add more car colors).  
+
+
+Note -- I can't switch palettes with any of the animated characters 
+(such as the turtles).  So all the tiles in a sequence have to be in
+the same palette.  The animation frames are stored separately.  For each
+different sequence (e.g. sinking turtle, non-sinking turtle) we use a 
+different version of the tile.  That's why the font has two turtles.  
+I also can't change to much of the font during vblank, so I can't do
+the sinking logs.  But the turtles performthe same function.
+	But we can have different palettes for different levels, so
+the levels that are all road can add car colors if you want.
+
+I need 
+1.  A final sinking frame for the turtles.  (The original one
+used a different palette.  I roughed something out in the animation file.)
+
+2.  An exit (a door or a warp or whatever).  Also, a locked or closed version.	
+
+3. Oil slicks.  These will be on the road.  Probably in a strip all the way
+across a lane.  (See the demo game for an example.)
+
+
+Sprites
+
+We're going to have global and local sprites.  The frog and the pickups will
+be in every world, but some of the enemies will only be in some of the worlds,
+so we can load them on their won and have different palettes.  
+There are two kinds fo frog death.  I mocked up a ghost for one. (I'm sure you can
+make it look a lot better.)
+The other is when the frog falls (in later worlds).  We need a shrinking
+animation so it looks like he's plunging to his death (and then maybe a
+ghost that reverses the sequence, so it rises.)
+
+I roughed out some of the icons.  We can make things as many frames as you want.
+
+I need:
+
+1. Gems (flashing or pulsing).  Each frame is an 8x8.
+2. Dead frog.
+3. Falling frog.
+4. Checkpoint (with some change to show it's been reached).
+5. Hourglass (or something else that adds to the timebar).
+6. Another frame for the snake.
+
+
+World 0 will have
+Snakes
+Bees
+
+World 1 will have
+Bats (front view, flying)
+Spiders (crawling)
+

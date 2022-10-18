@@ -1,0 +1,18 @@
+initfrog	
+	ld	hl,frogfont	;temp font
+	call	getspf		;get sprite palette and font
+newfrog				;temp label, called after dying
+	ld	a,$40		;start at bottom, in middle of lane
+	ld	(frogx),a
+	ld	a,STARTY
+	ld	(frogy),a
+	xor	a
+	ld	(frogframe),a
+	ld	(jumpcount),a
+	ld	(jumpx),a
+	ld	(jumpy),a
+	ld	(loglane),a
+	ld	(timeptr),a
+	ld	(gotfem),a
+
+

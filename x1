@@ -1,0 +1,515 @@
+Comparing files brains.dmg and brains1.old
+****** brains.dmg
+
+        if 0
+
+initstar                ;hl = current brain
+        ld      de,starbrain
+        ld      a,e
+        ld      (hli),a
+        ld      a,d
+        ld      (hli),a
+        inc     hl
+        inc     hl
+        inc     hl
+        ld      a,starchar
+        ld      (hli),a
+        inc     hl
+        inc     hl
+        inc     hl
+        xor     a
+        ld      (hl),a
+        ret
+
+        endif
+contcol                 ;for checkpoints
+****** brains1.old
+
+contcol                 ;for checkpoints
+******
+
+****** brains.dmg
+
+        if 0
+killenemies                     ;do better later
+        ld      hl,spvars+1     ;point to brains
+        ld      c,$f
+        ld      de,$10-1
+l0
+        ld      a,<initstar
+        ld      (hli),a
+        ld      a,>initstar
+        ld      (hl),a
+****** brains1.old
+
+killenemies                     ;do better later
+        ld      hl,spvars
+        ld      c,$f
+        ld      de,$10
+        xor     a
+l0
+        ld      (hl),a
+******
+
+****** brains.dmg
+        ret
+        endif
+
+killenemies                     ;do better later
+        ld      hl,spvars+1     ;point to brains
+        ld      c,$f
+        ld      de,$10
+        xor     a
+l0
+        ld      (hli),a
+        dec     c
+        jr      nz,l0
+        ret
+****** brains1.old
+        ret
+        
+
+        ret
+******
+
+****** brains.dmg
+
+patternw5ca
+        db      0,-1
+        db      0,-1
+        db      -1,0
+****** brains1.old
+
+patternw5d
+        db      -2,0
+        db      4,0
+        db      -2,0
+        db      4,0
+        db      -2,0
+        db      4,0
+        db      0,2
+        db      1,0
+        db      -1,0
+        db      0,-2
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      0,1
+        db      0,1
+****** brains1.old
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+
+patternw5e
+        db      -1,0
+        db      0,-1
+        db      0,-1
+        db      -1,0
+        db      1,0
+        db      0,1
+******
+
+****** brains.dmg
+        db      1,0
+        db      1,0
+        db      0,-2
+        db      -2,0
+        db      0,2
+        db      2,0
+        db      0,-2
+        db      -2,0
+        db      0,2
+        db      2,0
+
+
+patternw5d
+        db      -2,0
+****** brains1.old
+        db      1,0
+        db      0,1
+        db      0,-1
+        db      1,0
+        db      1,0
+        db      0,1
+        db      0,-1
+        db      -1,0
+        db      -1,0
+        db      0,1
+patternw5f
+        db      -2,0
+        db      -2,0
+******
+
+****** brains.dmg
+        db      4,0
+        db      -2,0
+        db      4,0
+        db      -2,0
+        db      4,0
+        db      0,2
+        db      1,0
+        db      -1,0
+        db      0,-2
+        db      -1,0
+****** brains1.old
+        db      4,0
+        db      1,0
+        db      1,0
+        db      0,1
+        db      0,1
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      -1,0
+****** brains1.old
+        db      -1,0
+        db      0,1
+        db      1,0
+        db      0,-1
+        db      1,0
+        db      0,-2
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      -1,0
+        db      -1,0
+
+patternw5e
+        db      -1,0
+        db      0,-1
+        db      0,-1
+        db      -1,0
+****** brains1.old
+        db      -1,0
+patternw5g
+        db      -1,0
+******
+
+****** brains.dmg
+        db      1,0
+        db      0,1
+        db      1,0
+        db      0,1
+        db      0,-1
+        db      1,0
+        db      1,0
+        db      0,1
+        db      0,-1
+        db      -1,0
+****** brains1.old
+        db      1,0
+        db      -2,2
+        db      2,-2
+        db      0,2
+        db      0,-2
+        db      1,1
+        db      -1,-1
+        db      1,0
+        db      -1,0
+        db      0,0     
+        db      0,0     
+        db      0,0     
+        db      0,0     
+        db      0,0     
+        db      0,0     
+
+
+
+
+platpattern0
+        db      0,0
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      0,1
+patternw5f
+        db      -2,0
+        db      -2,0
+        db      4,0
+        db      1,0
+****** brains1.old
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      0,0
+        db      1,0
+******
+
+****** brains.dmg
+        db      1,0
+        db      0,1
+        db      0,1
+        db      -1,0
+****** brains1.old
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+
+platpattern1
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      0,1
+        db      1,0
+        db      0,-1
+        db      1,0
+        db      0,-2
+        db      -1,0
+****** brains1.old
+        db      -1,0
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+patternw5g
+        db      -1,0
+****** brains1.old
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+******
+
+****** brains.dmg
+        db      1,0
+        db      -2,2
+        db      2,-2
+        db      0,2
+        db      0,-2
+        db      1,1
+        db      -1,-1
+        db      1,0
+        db      -1,0
+        db      0,0     
+        db      0,0     
+        db      0,0     
+        db      0,0     
+        db      0,0     
+        db      0,0     
+
+****** brains1.old
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+
+******
+
+****** brains.dmg
+
+
+platpattern0
+        db      0,0
+        db      -1,0
+****** brains1.old
+
+platpattern2
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      0,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+
+platpattern1
+        db      -1,0
+****** brains1.old
+        db      -1,0
+        db      -1,0
+
+
+
+
+        if      0
+
+platpattern0
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      1,0
+****** brains1.old
+        db      -1,0
+        db      0,0
+        db      0,0
+        db      1,0
+******
+
+****** brains.dmg
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+
+
+
+platpattern2
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      -1,0
+****** brains1.old
+        db      1,0
+        db      0,0
+        db      0,0
+        db      0,0
+        db      0,0
+platpattern1
+        db      0,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      -1,0
+******
+
+****** brains.dmg
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+
+
+
+
+        if      0
+
+platpattern0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      0,0
+****** brains1.old
+        db      -1,0
+        db      0,0
+******
+
+****** brains.dmg
+        db      0,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      1,0
+        db      0,0
+        db      0,0
+        db      0,0
+        db      0,0
+platpattern1
+        db      0,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      1,0
+        db      0,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      -1,0
+        db      0,0
+        db      0,0
+
+****** brains1.old
+        db      0,0
+
+******
+
+****** brains.dmg
+
+        if      0
+
+starbrain               ;starburst
+l0
+        call    getspdata
+        ld      hl,spritecounter
+        inc     (hl)
+        ld      a,(hl)
+        and     3
+        jr      nz,l1
+        ld      hl,spriteframe
+        inc     (hl)
+        ld      a,(hl)
+        cp      starend
+        jp      z,killsprite
+l1
+        call    savespdata
+        ld      a,(spriteframe)
+        sla     a
+        sla     a
+        ld      (spritechar),a
+        ld      a,2
+        ld      (spritewidth),a
+        ld      a,starpal
+        ld      (spriteatt),a
+        call    drawsprite
+        ret
+
+        endif
+
+****** brains1.old
+
+
+******
+
+

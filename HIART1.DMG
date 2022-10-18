@@ -1,0 +1,47 @@
+	thisbank	$35
+	org	$4000
+ltranbank	equ	$35
+ltranpal		includeraw	grfx\ltranpal.raw
+ltranmap		includeraw	grfx\ltranmap.raw
+			includeraw	grfx\ltranatr.raw
+			includeraw	grfx\ltrantil.raw
+
+
+	thisbank	$34
+	org	$4000
+menubank	equ	$34
+menupal		includeraw	grfx\menupal.raw
+menumap		includeraw	grfx\menumap.raw
+		includeraw	grfx\menuatr.raw
+		includeraw	grfx\menutil.raw
+
+	thisbank	$33
+	org	$4000
+guestbank	equ	$33
+guestpal		includeraw	grfx\guestpal.raw
+guestmap		includeraw	grfx\guestmap.raw
+		includeraw	grfx\guestatr.raw
+		includeraw	grfx\guesttil.raw
+
+
+	thisbank	$32
+	org	$4000
+selbank	equ	$32
+selpal		includeraw	grfx\selpal.raw
+selmap		includeraw	grfx\selmap.raw
+		includeraw	grfx\selatr.raw
+		includeraw	grfx\seltil.raw
+
+	thisbank	$31
+	org	$4000
+legalbank	equ	$31
+legalpal		includeraw	grfx\legalpal.raw
+legalmap		includeraw	grfx\legalmap.raw
+			includeraw	grfx\legalatr.raw
+			includeraw	grfx\legaltil.raw
+
+	dumpsym	hiart1
+
+
+
+

@@ -1,0 +1,92 @@
+hicolorHBL
+	push	AF
+	push	HL
+	push	DE
+	ld	A, (hibank)
+	ld 	($2000), A
+	ld	(savestack),sp			;store SP.
+	ld		hl,$4000	;all palette blocks start at $4000
+	ld		sp,hl				;
+
+	ld		a,$80				;
+	ld		($ff68),A			;setup palette write.
+	ld		hl,$FF44         		;
+	xor		a
+hiwait
+	cp		(HL) 				;
+	jr		nz,hiwait
+palloop
+	pop		de            		;get 2 palette values.
+	ld		l,$41		;point HL to STAT.
+waitstat2
+	bit		1,(hl)				;wait for HBlank.
+	jr		nz,waitstat2 		;
+fti
+	ld		l,$69
+
+	ld		(hl),e        		;
+	ld		(hl),d        		;write 2 palette values.
+	pop		de
+	ld		(hl),e				;
+	ld		(hl),d
+	pop		de            		;get 2 palette values.
+	ld		(hl),e        		;
+	ld		(hl),d        		;write 2 palette values.
+	pop		de					;
+	ld		(HL),e				;
+	ld		(HL),d	
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+	pop		de            		;get 2 palette values.
+	ld		(HL),e        		;
+	ld		(HL),d        		;write 2 palette values.
+	pop		de
+	ld		(HL),e				;
+	ld		(HL),d
+
+	ld		a,($ff44)        		;
+	cp		#142		;test for bottom of image.
+	jr		nz,palloop			;
+
+	ld		A,(savestack)
+	ld		L, A
+	ld		A,(savestack+1)
+	ld		H, A
+	ld		sp,hl
+	ld		A, #1
+	ld		($2000),A
+	pop	DE
+	pop	HL
+nopic:
+	pop	AF
+	reti
+
+

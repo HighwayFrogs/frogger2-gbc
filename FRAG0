@@ -1,0 +1,8 @@
+levtexttab	dw	lt0,lt1,lt2,lt3,lt4,lt5,lt6,lt7
+
+
+;			 0123456789abcded0123
+lt0		db	"WATCH OUT FOR SNEAKY ",$d
+		db	"GATORS IN LEVEL TWO",0
+
+

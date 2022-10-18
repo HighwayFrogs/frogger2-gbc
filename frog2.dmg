@@ -1,0 +1,205 @@
+;	list
+; GBC BASE PROGRAM
+; 
+
+quick		equ	0	;skip title  SET = 0 for release
+production	equ	1	;final version SET = 1 for release
+devel		equ	0	;include cheats SET = 0 for release
+
+bonus		equ	1	;hidden stuff
+flashy		equ	1
+
+	include		system	;system equates and vectors
+	include		equ	;program equates
+	include		init
+	include	 	main
+	include		subs
+	include		f2subs	;game-specific code	
+	include		data	;jump tables, etc.
+	include		brains
+
+endb0
+chk_bank0
+
+	thisbank 1
+	org	$4000
+statmap		includeraw	grfx\statmap.raw
+statfont	includeraw	grfx\statfont.raw
+cset		includeraw	grfx\cset.raw
+hintset		includeraw	grfx\hintset.raw
+cset1		includeraw	grfx\cset1.raw
+cset2		includeraw	grfx\cset2.raw
+
+statpal		includeraw	grfx\status.pal
+lstatpal	includeraw	grfx\lstat.pal
+lilpal		includeraw	grfx\lilly.pal
+
+		include		code1
+		include		data1
+
+endb1
+
+;bank 2
+	thisbank 2
+	org	$4000
+
+; Music and sound jump table interface
+
+music	ds	3
+setseq	ds	3
+sndoff	ds	3
+sound	ds	3
+setsnd	ds	3
+killid	ds	3
+
+		include	data2.dmg
+
+endb2
+
+
+; bank 3
+
+	thisbank 3
+	org	$4000
+catanim	includeraw		grfx\catanim.raw
+vatanim	equ	catanim+$400
+carsanim includeraw		grfx\carsanim.raw
+turtles	includeraw		grfx\turtles.raw
+rockanim includeraw		grfx\rockanim.raw
+gatoranim	equ	rockanim+$200
+head0	equ	gatoranim
+head1	equ	gatoranim+$40
+head2	equ	gatoranim+$80
+tail0	equ	gatoranim+$c0
+tail1	equ	gatoranim+$100
+fireanim	includeraw	grfx\w5anim.raw
+
+
+tailloc0	equ	$9700
+tailloc1	equ	$97c0
+headloc0 	equ	$9280
+headloc1	equ	$91c0
+
+
+sprites
+	includeraw		grfx\sprites.pal
+	includeraw		grfx\sprites.raw
+lillysp
+	includeraw		grfx\lilly.pal
+	includeraw		grfx\lilly.raw
+
+menusprt
+	includeraw		grfx\menusprt.pal
+	includeraw		grfx\menusprt.raw
+
+endb3
+
+
+endb4
+
+	thisbank	5
+	org	$4000
+w4sprite	includeraw	grfx\w4sprite.raw
+w4font
+carsfont	includeraw	grfx\w4font.raw
+w4l0map
+carsmap		includeraw	grfx\w4l0map.raw
+w4l1map		includeraw	grfx\w4l1map.raw
+w4l2map		includeraw	grfx\w4l2map.raw
+w4pal
+carspal		includeraw	grfx\w4.pal
+
+
+
+
+	thisbank $c
+	org	$4000
+w1sprite	includeraw	grfx\w1sprite.raw
+w1font		includeraw	grfx\w1font.raw
+w1pal		includeraw	grfx\w1.pal
+w1l0map		includeraw	grfx\w1l0map.raw
+w1l1map		includeraw	grfx\w1l1map.raw
+w1l2map		includeraw	grfx\w1l2map.raw
+w1l3map		includeraw	grfx\w1l3map.raw
+w1l4map		includeraw	grfx\w1l4map.raw
+w1l5map		includeraw	grfx\w1l5map.raw
+
+endbc
+
+	thisbank	$3b
+	org	$7000
+	include	code3b	;code for records
+
+
+
+	thisbank -1
+	otherbank 1
+
+
+	dumpsym	base.sym		;Dump all symbols
+
+
+
+
+;Error messages (Others are in seperate assemblies)
+
+	if (ram_top > $de00)
+	pseudwarn Overflow - Work RAM space exceeded
+	endif
+
+	if (iram_end > $FFFF) || (iram_end < $1000)
+	pseudwarn Overflow - Internal RAM space exceeded
+	endif
+
+	if (chk_bank0 > $4000)
+	pseudwarn Overflow - Bank 0 code past end of bank 0
+	endif
+
+	if (0+endb1 > $8000)
+	pseudwarn Overflow - Main code ("banks" 0 and 1 - low) exceeds $8000
+	nolist
+	endif
+
+	if (0+endb2 > $8000)
+	pseudwarn Overflow - Bank 2 data exceeds $8000
+	endif
+
+	if (0+endb3 > $8000)
+	pseudwarn Overflow - Bank 3 data exceeds $8000
+	endif
+
+;	if (0+endb4 > $8000)
+;	pseudwarn Overflow - Bank 4 data exceeds $8000
+;	endif
+;	if (0+endb5 > $8000)
+;	pseudwarn Overflow - Bank 5 data exceeds $8000
+;	endif
+;	if (0+endb6 > $8000)
+;	pseudwarn Overflow - Bank 6 data exceeds $8000
+;	endif
+;	if (0+endb7 > $8000)
+;	pseudwarn Overflow - Bank 7 data exceeds $8000
+;	endif
+
+
+
+
+	list
+; Bytes remaining:
+l0	equ	0+$4000-endb0		;bank 0
+l1	equ	0+$8000-endb1		;bank 1
+l2	equ	0+$8000-endb2		;bank 2
+l3	equ	0+$8000-endb3		;bank 3
+;l4	equ	0+$8000-endb4		;bank 4
+;l5	equ	0+$8000-endb5		;bank 5
+;l6	equ	0+$8000-endb6		;bank 6
+;l7	equ	0+$8000-endb7		;bank 7
+
+
+
+	nolist
+
+	end
+
+
+

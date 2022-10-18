@@ -1,0 +1,287 @@
+showhigh
+	call	lcd_off
+	ld	a,hiscrbank
+	ld	(hibank),a
+	call	forcebank
+	ld	hl,0+hiscrmap
+	call	loadhiart
+	call	sethirq
+	ld	a,$40
+	ld	(stat),a	;enable lcdc irq
+	ld	a,1
+	call	forcebank					       
+	call	histuff
+	ld	a,1
+	ld	(lcdc),a
+	call	lcd_on
+	ret
+
+
+
+showgover
+	call	lcd_off
+	xor	a
+	ld	(ingame),a
+	ld	a,higoverbank
+	ld	(hibank),a
+	call	forcebank
+	ld	hl,0+higovermap
+	call	loadhiart
+	call	sethirq
+	ld	a,$40
+	ld	(stat),a	;enable lcdc irq
+	ld	a,1
+	call	forcebank					       
+	ld	a,1
+	ld	(lcdc),a
+	call	lcd_on
+	ret
+
+loadhiset
+	ld	a,csetbank
+	call	forcebank
+	ld	a,1
+	ld	(vbk),a
+	ld	hl,cset
+	ld	de,csetloc2
+	ld	bc,$3b0
+	call	movehldebc
+	xor	a
+	ld	(vbk),a
+	ret
+
+
+
+histuff	;display hi scores, etc.
+	call	writeon
+	call	checkhi		;look for new high score
+	call	loadhiset
+	call	printhigh
+	call	writeoff
+	ret
+
+highword	db	"HIGH SCORES",0
+
+printhigh
+;	ld	de,hiwordloc
+;	call	writehitext
+
+
+	ld	hl,$9800
+	ld	c,0
+l0
+	ld	a,$80
+	ld	(hli),a
+	dec	c
+	jr	nz,l0	
+
+
+	ld	b,5	;five lines of high scores
+	ld	hl,hinames
+	ld	de,hiloc
+l0
+	ld	c,8
+l1
+	ld	a,(hli)	;get name
+	add	a,ALPHASTART2-"!"+1
+	ld	(de),a
+	ld	a,1
+	ld	(vbk),a
+	ld	a,(de)
+	or	8	;bank 1
+	ld	(de),a
+	xor	a
+	ld	(vbk),a
+
+	inc	de
+	dec	c
+	jr	nz,l1	;name is printed
+	ld	a,e
+	add	a,$20-8
+	ld	e,a
+	jr	nc,l2
+	inc	d
+l2
+	dec	b
+	jr	nz,l0		;next name
+
+				;now do scores
+	ld	b,5	
+	ld	hl,hiscores
+	ld	de,hiloc+8+1
+l0
+	ld	c,4
+l1
+	ld	a,(hli)	;get digit
+	and	a
+	jr	nz,notzero
+	inc	de
+	dec	c
+	jr	nz,l1
+	jr	l4		;shouldn't get there
+l2
+	ld	a,(hli)
+notzero
+	add	a,alphastart2+$10
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l2
+	ld	a,alphastart+$10
+	ld	(de),a		;last digit is always 0
+	ld	a,e
+	add	a,$1c
+	ld	e,a
+	jr	nc,l3
+	inc	d
+l3
+;	ld	a,l
+;	add	a,8
+;	ld	l,a
+;	jr	nz,l4
+;	inc	h
+l4
+	dec	b
+	jr	nz,l0		;next score
+	ret
+
+checkhi
+	xor	a
+	ld	(hiflag),a
+	ld	b,4
+	ld	hl,score	;point to highest digit
+	ld	de,hiscores	
+	call	compare
+	jr	nc,newhi
+	dec	b
+
+	ld	hl,score	
+	ld	de,hiscores+4	
+	call	compare
+	jr	nc,newhi
+	dec	b
+
+	ld	hl,score	
+	ld	de,hiscores+8
+	call	compare
+	jr	nc,newhi
+	dec	b
+
+	ld	hl,score	
+	ld	de,hiscores+12	
+	call	compare
+	jr	nc,newhi
+	dec	b
+
+	ld	hl,score	
+	ld	de,hiscores+16	
+	call	compare
+	ret	c
+newhi				;
+	xor	a
+	ld	(hicursor),a
+	ld	a,1
+	ld	(hiflag),a
+	ld	a,b
+	ld	(hilane),a	;mark which lane gets new hi score
+				;now shift down each name 
+	ld	hl,hinames+$1f	;point to last next to last one
+	ld	de,hinames+$27	;end of last one
+	and	a
+	jr	z,chk1		;lowest name, so no shift needed
+l0
+	ld	c,8
+l1
+	ld	a,(hld)
+	ld	(de),a
+	dec	de
+	dec	c
+	jr	nz,l1
+	dec	b
+	jr	nz,l0
+chk1				;and clear out space for name
+	ld	c,8
+	ld	hl,playername+7
+l0
+	ld	a,(hld)
+	ld	(de),a
+	dec	de
+	dec	c
+	jr	nz,l0
+;	inc	de
+;	ld	a," "
+;	ld	(de),a			;put up first character for new name
+;	ld	a,e
+;	ld	(hiptr),a	 	;save location of empty name
+;	ld	a,d
+;	ld	(hiptr+1),a
+				;now do scores
+	ld	a,(hilane)	
+	ld	b,a
+	ld	hl,hiscores+$f	;point to last next to last one
+	ld	de,hiscores+$13	;end of last one
+	and	a
+	jr	z,chk2		;lowest score in list, so no shifts
+l0
+	ld	c,4
+l1
+	ld	a,(hld)
+	ld	(de),a
+	dec	de
+	dec	c
+	jr	nz,l1
+	dec	b
+	jr	nz,l0
+chk2				;and put up new score
+	ld	c,4
+	ld	hl,score+3
+l0
+	ld	a,(hld)
+	ld	(de),a
+	dec	de
+	dec	c
+	jr	nz,l0
+	ret
+	
+
+
+
+
+compare	   			;returns carry clear if score (hl)
+l0	ld	a,(de)		;is higher than hi score (de)
+	ld	c,a
+	ld	a,(hli)
+	cp	c
+	ret	c		;smaller 
+	ret	nz		;larger
+
+	inc	de
+	ld	a,(de)
+	ld	c,a
+	ld	a,(hli)
+	cp	c
+	ret	c		;smaller 
+	ret	nz		;larger
+
+	inc	de
+	ld	a,(de)
+	ld	c,a
+	ld	a,(hli)
+	cp	c
+	ret	c		;smaller 
+	ret	nz		;larger
+
+	inc	de
+	ld	a,(de)
+	ld	c,a
+	ld	a,(hli)
+	cp	c
+	ret
+
+keycheck
+	call	read_keys
+	call	coldstart
+	ret
+
+
+

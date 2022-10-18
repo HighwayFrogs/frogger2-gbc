@@ -1,0 +1,16 @@
+	thisbank	$3b
+	org	$4000
+recordsbank	equ	$3b
+
+recordspmf	includeraw	records.pmf
+icons		includeraw	grfx\stats.raw
+iconspal	includeraw	grfx\stats.pal
+rsprites
+	includeraw		grfx\sprites.pal
+	includeraw		grfx\sprites.raw
+rfont
+rcset		includeraw	grfx\cset1.raw
+rpal		includeraw	grfx\status.pal
+
+	dumpsym	rec
+

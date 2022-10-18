@@ -1,0 +1,112 @@
+frogframes		;y offset, x offset, character, attribs, offsets
+;0-7
+	db	$00,$02,$01,$03	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$04,$06,$05,$07	;frames			  ;up, jump
+	db	$00		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$08,$0a,$09,$0b	;frames			  ;right
+	db	$00		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$0c,$0e,$0d,$0f	;frames			;right, jump
+	db	$00		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+;***
+	db	$01,$03,$00,$02	;frames			   ;down
+	db	$40		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$05,$07,$04,$06	;frames			   ;down, jump
+	db	$40		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$0a,$08,$0b,$09	;frames			  ;left
+	db	$20		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$0e,$0c,$0f,$0d	;frames			   ;left, jump
+	db	$20		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+; frames 8 - b -- dead
+
+dch	equ	$10		;start of dead characters
+	db	$00+dch,$02+dch,$01+dch,$03+dch	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$04+dch,$06+dch,$05+dch,$07+dch	;frames			  ;right
+	db	$00		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$01+dch,$03+dch,$00+dch,$02+dch	;frames			   ;down
+	db	$40		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$06+dch,$04+dch,$07+dch,$05+dch	;frames			  ;left
+	db	$20		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+;frames $c -- $13 -- spinning
+iceframes	equ	$c
+
+sch	equ	$18
+
+	db	$00,$02,$01,$03	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$00+sch,$02+sch,$01+sch,$03+sch	;frames		       ;45 degrees
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$08,$0a,$09,$0b	;frames			  ;right
+	db	$00		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$01+sch,$03+sch,$00+sch,$02+sch	;frames		       ;135
+	db	$40		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$01,$03,$00,$02	;frames			   ;down
+	db	$40		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$03+sch,$01+sch,$02+sch,$00+sch	;frames		       ;225
+	db	$60		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$0a,$08,$0b,$09	;frames			  ;left
+	db	$20		;attribute
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$02+sch,$00+sch,$03+sch,$01+sch	;frames		       ;315
+	db	$20		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+fch	equ	$1c	;falling
+;falling frames $14 - $17
+fallframes	equ	$14
+	db	$00+fch,$02+fch,$01+fch,$03+fch	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$04+fch,$06+fch,$05+fch,$07+fch	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$08+fch,$0a+fch,$09+fch,$0b+fch	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+	db	$0c+fch,$0e+fch,$0d+fch,$0f+fch	;frames		       ;up
+	db	$00		;attribute,
+	db	$00,$00,$00	;x offset, yoffset, dummy
+
+
+

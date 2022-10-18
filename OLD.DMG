@@ -1,0 +1,484 @@
+initlev1
+	call	initfrog
+	call	initlev1data
+	ld	a,lev1bank
+	call	forcebank	
+	ld	hl,0+lev1font
+	call	getfont1	;ho inc of hl before block move
+	call	initlev1map
+	ld	hl,0+lev1pal
+	call	getpal
+	ld	a,1
+	call	forcebank
+	call	lcd_on
+	ret
+
+initlev1data
+	ret
+
+initlev1map
+	ld	hl,0+lev1map+(64*32)
+	ld	de,$9800
+	ld	bc,32*32
+	call	mapwords
+	ret
+
+initpondgame
+	call	initpond
+	call	initfrog
+	ld	a,3
+	ld	(LCDC),a
+	call	lcd_on
+	ret
+initpond
+	ld	a,pondbank
+	call	forcebank
+	ld	hl,0+pond0pmf
+	call	getpmf
+	ld	a,1
+	call	forcebank
+	call	initponddata
+	call	pondscroll
+
+
+	ret	
+
+initponddata
+	ld	a,$28
+	ld	(xmin),a
+	ld	a,$30
+	ld	(ymin),a
+	ld	a,$e0
+	ld	(xmax),a
+	ld	a,$e0
+	ld	(ymax),a
+	ret
+
+
+pondscroll		;scroll screen based on frog x and t
+
+	ld	a,(frogx)
+	sub	$50
+	jr	c,zerox
+	cp	$60
+	jr	c,dox
+	ld	a,$5f
+	jr	dox
+zerox
+	xor	a
+	jr	dox	
+dox
+	ld	(pondx),a
+
+	ld	a,(frogy)
+	sub	$48
+	jr	c,zeroy
+	cp	$70
+	jr	c,doy
+	ld	a,$6f
+	jr	doy
+zeroy
+	xor	a
+	jr	doy	
+doy
+	ld	(pondy),a
+	ret		
+
+initroadgame
+	call	lcd_off
+	call	initroad
+	call	initfrog
+	ld	a,3
+	ld	(lcdc),a
+	call	lcd_on
+	ret
+
+initroad
+	ld	a,roadbank
+	call	forcebank
+	ld	hl,0+road0pmf
+	call	getpmf
+	call	initroaddata
+	ret
+
+initroaddata
+	call	initlanes
+	ld	a,$1f
+	xor	a
+	ld	(lyc),a
+
+	ld	a,$28
+	ld	(xmin),a
+	ld	a,$28
+	ld	(ymin),a
+	ld	a,$90
+	ld	(xmax),a
+	ld	a,$80
+	ld	(ymax),a
+	ret
+
+initflumegame
+	call	lcd_off
+	call	initflume
+	call	initfrog
+	ld	a,$63
+	ld	(LCDC),a
+	ld	a,$80
+	ld	(wy),a
+	call	lcd_on
+	ret
+initflume
+	ld	a,flumebank
+	call	forcebank
+	ld	hl,0+flume0pmf
+	call	getpmf
+	call	getfplat
+
+;	ld	a,logsbank
+;	call	forcebank
+;	ld	hl,0+logspmf
+;	call	getpal
+;	ld	hl,0+logsfont
+;	call	getfont
+;	ld	hl,0+logsmapend
+;	call	initbigmap4	;for maps 4 high
+
+	ld	a,1
+	call	forcebank
+	call	initflumedata
+	ret	
+
+initflumedata
+
+	xor	a
+	ld	(flumey),a	;scroll value
+
+	ld	hl,flumecharloc
+	ld	de,flumecharbuf	;put each non-scrolling character
+	ld	b,flumecharnum	;into a buffer twice
+l0
+	ld	c,$10
+	push	hl
+	call	movehldec	;hl -> de, c = count
+	pop	hl
+	ld	c,$10
+	call	movehldec	
+	dec	b
+	jr	nz,l0	
+
+	ld	a,$28
+	ld	(xmin),a
+	ld	a,$28
+	ld	(ymin),a
+	ld	a,$90
+	ld	(xmax),a
+	ld	a,$80
+	ld	(ymax),a
+
+
+	ret
+
+writeflumedata		;update character defs to cancel scrolling
+
+	ld	hl,flumecharbuf
+	ld	de,flumecharloc	;put each non-scrolling character
+	ld	b,flumecharnum	;into a buffer twice
+	ld	a,(flumey)
+	and	7
+	ld	c,a
+	xor	a
+	sub	c
+	and	7
+;	xor	7
+	sla	a
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+l0
+	ld	c,$10
+	call	movehldecv	;hl -> de, c = count
+	ld	a,l
+	add	a,$10
+	ld	l,a
+	xor	a
+	add	a,h
+	ld	h,a
+	dec	b
+	jr	nz,l0	
+	ret
+
+
+
+getfplat		;platform (screen at $9c00) for flume scenes
+
+
+	ld	a,1
+	ld	(vbk),a
+	ld	hl,0+fplatpmf+$440 ;skip palette and characters
+	ld	de,$9c00
+	ld	c,$40
+l0
+	ld	a,(hli)
+	or	8+2
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l0
+
+	ld	hl,0+fplatpmf+$840 ;font
+	ld	de,$9000
+	ld	c,$80	;just 8 characters for now
+	call	movehldec
+
+
+	xor	a
+	ld	(vbk),a
+	ld	hl,0+fplatpmf+$40	;skip palette
+	ld	de,$9c00
+	ld	c,$40
+	call	movehldec	
+
+
+
+flumetest
+			;scroll screen and call character set code
+
+	ld	a,(frame)
+	and	$3
+	jr	z,slowscroll
+	ld	a,(stick)
+	and	buta
+	ret	z
+	ld	a,(frame)
+	and	$1
+	ret	nz	
+slowscroll
+	ld	a,(flumey)
+	dec	a
+	ld	(flumey),a
+	ld	(scy),a
+;	call	writeflumedata
+	ld	hl,yscrollflag
+	inc	(hl)
+	ret
+
+pondcode
+	call	jumping
+	call	movefrog	;outside influences (scroll, etc)
+	call	drawpondfrog
+	call	pondscroll
+	ret
+
+roadcode
+	call	movecars
+	call	jumping
+	call	movefrog	;outside influences (scroll, etc)
+	call	drawfrog
+	ret
+
+;calls for flume game
+flumecode
+	call	flumecolls	;check for current character
+	call	jumping
+	call	movefrog	;outside influences (scroll, etc)
+	call	drawfrog
+	ret
+
+flumecolls
+	ld	a,(frogx)
+	ld	(objx),a
+	ld	a,(frogy)
+	ld	(objy),a
+	ld	a,(flumey)
+	ld	(screeny),a
+	xor	a
+	ld	(screenx),a
+	call	charcolls
+	ld	(colchar),a
+	ret
+
+charcolls
+
+	ld	a,(screeny)
+	ld	b,a
+	ld	a,(objy)
+	add	a,b
+	sub	$c	;10
+
+	and	$f8		;just care about characters
+	ld	l,a
+	xor	a
+	ld	h,a
+	sla	l		;already *8
+	rl	h		;now make *32 for character lookup
+	sla	l
+	rl	h
+	ld	de,$9800
+	add	hl,de
+	ld	a,(objx)
+	ld	b,a
+	ld	a,(screenx)
+	add	a,b
+	srl	a		;x loc / 8
+	srl	a
+	srl	a
+	add	a,l
+	ld	l,a
+l0
+	ld	a,(stat)
+	and	2
+	jr	nz,l0
+	ld	a,(hl)
+	ld	(colchar),a
+
+;
+; test
+;
+;l0
+;	ld	a,(stat)
+;	and	2
+;	jr	nz,l0
+;	ld	(hl),a
+
+	ret
+
+
+vbflume
+	call	flumetest
+	ret
+
+vbpond
+	ld	a,(pondx)
+	ld	(scx),a
+	ld	a,(pondy)
+	ld	(scy),a
+	ret
+vbroad
+	ret	
+
+
+
+
+drawpondfrog			;get 8 bytes from data (frogframe*8)
+				;4 chars. and attrib for each cell
+				;x and y offset for shape, dummy byte
+				;and move to oamshad, adjusting
+ 				;x and y values for frogx, frogy
+l0
+			;adjustments for dying, etc. (do later)
+l1		
+	ld	a,(frogframe)
+	ld	d,a
+	sla	a
+	sla	a
+	sla	a
+	ld	hl,frogframes
+	add	a,l
+	ld	l,a
+	jr	nc,l3
+	inc	h
+l3
+	ld	b,frogpal
+	   		;hl points to desired from frame
+			;store characters and attribute
+	ld	a,(hli)
+	ld	(oamshad+2),a	;first char
+	ld	a,(hli)
+	ld	(oamshad+6),a	;2nd char
+	ld	a,(hli)
+	ld	(oamshad+$a),a	;3rd char
+	ld	a,(hli)
+	ld	(oamshad+$e),a	;4th char
+	ld	a,(hli)		;attrib
+	or	b
+	ld	(oamshad+3),a
+	ld	(oamshad+7),a
+	ld	(oamshad+$b),a
+	ld	(oamshad+$f),a
+
+				;now do x and y
+
+	ld	a,(hli)
+	ld	b,a
+	ld	a,(pondx)
+	ld	c,a
+	ld	a,(frogx)
+	sub	c
+	add	a,b
+
+	ld	(oamshad+1),a
+	ld	(oamshad+9),a
+	add	a,8
+	ld	(oamshad+5),a
+	ld	(oamshad+$d),a
+
+	ld	a,(hl)
+	ld	b,a
+
+	ld	a,(pondy)
+	ld	c,a
+	ld	a,(frogy)
+	sub	c
+
+	add	a,b
+	sub	4
+
+	ld	(oamshad+0),a
+	ld	(oamshad+4),a
+	add	a,8
+	ld	(oamshad+8),a
+	ld	(oamshad+$c),a
+	ret
+
+
+
+; map is stored as 32 wide x (32*4) high 
+; so init takes last 20 rows and puts them on the screen
+
+initbigmap4
+	ld	de,$9800
+l0
+	xor	a
+	ld	(vbk),a
+	ld	a,(hli)
+	ld	(de),a
+	ld	a,1
+	ld	(vbk),a
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	ld	a,d
+	cp	$9c
+	jr	nz,l0
+	ret
+
+initgame
+	call	lcd_off
+	call	resetscreen
+
+	jp	initlev1	;temp
+
+
+	ld	hl,initgametab
+	ld	a,(world)
+	jp	tablejump
+initgametab			;init a scenario
+	dw	initflumegame
+	dw	initpondgame
+	dw	initroadgame
+
+gamecodetab			;main loop code for ths scenario
+	dw	flumecode
+	dw	pondcode
+	dw	roadcode
+
+gamevbtab
+	dw	vbflume
+	dw	vbpond
+	dw	vbroad
+
+
+
+

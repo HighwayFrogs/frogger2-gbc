@@ -1,0 +1,108 @@
+Flow
+
+Press START
+go to NAME SELECT screen (3 names)
+Prompt -- "select a player"
+if player selects blank name, go to name entry screen
+else
+go to menu screen
+
+MENU
+
+PLAY   (play game from last save spot, or from start if new player)
+VISIT  (play any level already completed)
+RECORDS (see which levels player has cleared, beaten time, etc.  Icons
+in the shape of badges go here.)
+OPTIONS (delete player, music off, etc.)
+
+
+After each level, screen shows
+
+TIME
+RECORD TIME
+RECORD HOLDER (canned names at first, replaced by player names as
+times are beaten)
+CLEARED (flashing -- if player gets all gems)
+or PERFECT (if cleared without losing a frog)
+
+
+
+After each level, a screen shows time, record time, and record holder
+Also, gems collected.
+
+A stats page shows icons for each level with record time and with
+cleared (if player got all gems)
+
+Once a world has been played, the player can go back to it at will.
+
+Worlds
+
+Pond
+Boulders
+Ice
+Lava
+Tram
+Gems
+Boss
+
+World 0
+
+level 0 Cars and logs
+level 1 All cars
+level 2 Cars, logs, snakes
+level 3 Oily road
+level 4 Cars, logs, more snakes
+level 5 All water
+
+
+
+Terrain types
+
+Slippery (a jump ends with a slide)
+conveyors (so he slides against the way he scrolls)
+autobounce (makes him jump again in the same direction)
+sticky (can't jump for a moment, or need to try to jump several times)
+mud
+heated (can't stay on too long)
+switches
+arrows (directional bouncers) -- throws the frog in the pointed direction
+arrows with numbers (maybe the numbers change when jumped on)
+fire (maybe cycling from safe to deadly)
+
+Play ideas
+Switches with shapes on them -- e.g. cross switch xors cells in a cross, etc.
+So player has to hit the right sequence to form a path.
+Wall of dozers -- small gaps, slow moving
+
+
+Worlds and terrains
+Boulders (4 high)
+Tram cars
+Ice caverns
+
+
+Level ideas
+Oily roads
+Pond with mostly sinking lily pads and gems
+
+Sprites
+Scorpion
+
+Sprite types
+*Terrain follower
+*Pattern follower
+*Lane scroller
+*Free moving
+*Platform
+*Pickup
+
+
+
+Possible level goals
+Reach the top
+Gather all the gems
+Beat the clock
+Make three (or five) trips across
+Survive for a specific time period
+
+

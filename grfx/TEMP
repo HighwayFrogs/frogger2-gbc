@@ -1,0 +1,13 @@
+chars.grp:	chars.lbm
+	l2grp /SNS /h /v /t chars
+
+
+lev0.grp:	lev0.lbm chars.lbm
+	l2grp lev /sns /h /v /t lev0
+	grpmerge lev0.grp /m2 chars lev 
+	g2c <lev0.txt
+	copy lev0.pmf ..
+	levelmap <lev0.txt
+	copy lev0.map ..
+
+

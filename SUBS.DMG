@@ -1,0 +1,388 @@
+;Read key state and determine key OFF->ON transitions
+;Author: Nintendo, Comments by Mark Klein
+;Entry:
+;	(cnt1) - old key values
+;Return:
+;	(cnt1) - key state
+;       (trg1) - Off to On transition flags
+;Used:	a,b,c
+;Bit to key mapping:
+;********************
+;*    6             *
+;*  5   4  2 3  1 0 *
+;*    7             *
+;********************
+
+read_keys
+	ld	a,$20 		;Lower P14
+	ld	(p1),a
+	ld	a,(p1)		;Nintendo's delay
+	ld	a,(p1)		;Read P13..P10 (Pulled low if switch closed)
+	ld	a,(p1)		;Delay (total ld a,(p1)'s):
+	ld	a,(p1)		;Alleyway = 10, BaseBall = 7?
+	ld	a,(p1)		;Tetris = 4, Tennis = 2, Sample = 2
+	ld	a,(p1)
+	ld	a,(p1)
+	cpl
+	and	$0f
+	swap	a		;Place inverted P13..P10 into high nibble
+	ld	b,a		;Down, Up, Left, Right
+	ld	a,$10		;Lower P15
+	ld	(p1),a
+	ld	a,(p1)		;Nintendo's delay
+	ld	a,(p1)		;Alleyway = 10, BaseBall = 7?
+	ld	a,(p1)		;Tetris = 10, Tennis = 6, Sample = 6
+	ld	a,(p1)
+	ld	a,(p1)
+	ld	a,(p1)
+	ld	a,(p1)
+	ld	a,(p1)
+	ld	a,(p1)
+	ld	a,(p1)		;Read P13..P10
+	cpl
+	and	$0f		;Start, Select, B, A
+	or	b		;D, U, L, R, Strt, Sel, B, A
+	ld	c,a
+	ld	a,(cnt1)
+	xor	c		;Identify change
+	and	c		;Limit to ON transition
+	ld	(trg1),a	;Store results
+	ld	a,c
+	ld	(cnt1),a
+	ld	a,$30		;Return P15 and P14 to high state
+	ld	(p1),a
+	ret
+
+
+
+; ***********************************
+; ***  resident area subroutines  ***
+; ***********************************
+
+
+
+Init_MBC
+				;***Later $00, no RAM
+	xor	a
+	ld	(MBC_REG0),a
+	ld	(MBCshad0),a	;Shadow write for emulator
+	ld	a,1		;Bank 1 (1..3 allowed)
+	ld	(MBC_REG1),a
+	ld	(MBCshad1),a	;Shadow write for emulator
+	ret
+
+
+;Set MBC to selected bank
+;Enter:	Set_bank
+;	a - Bank number for upper 16k space (1,2,3)
+;Enter:	Set_bank_N
+;	none
+;Preserved: all
+dornd	ld	b,0		;cycle random once
+dorndb	inc	b		;cycle random b times
+dorndb1	ld	hl,random
+	ld	a,(hl)
+	sla	a
+	xor	(hl)
+	sla	a
+	rl	(hl)
+	dec	b
+	jr	nz,dorndb1
+	ld	a,(hl)
+	ret
+
+;Transfer dma_to_OAM routine to internal work ram
+;Used: a,b,c,hl
+
+dmaset	ld      c,low dma_to_OAM	;Destination low byte, high byte = $FF
+	ld      b,dma_end-dmadata	;Size of routine
+	ld      hl,dmadata		;Start of routine
+L0      ld      a,(hli)
+	ld      (c),a			;FF page store
+	inc     c
+	dec     b
+	jr      nz,L0
+	ret
+
+dmadata
+	loc	dma_to_OAM	;Ultimate destination of this routine
+	ld	a,high OAMshad	;Set start source addr and initiate copy
+	ld	(dma),a
+	ld	a,40            ;Loop 40 times, 160 cycle wait
+ddlp	dec	a
+	jr	nz,ddlp
+	ret
+	endloc			;Reset the above loc statement
+dma_end
+
+zero_ram_c			;Zero up to $FF bytes
+	ld	b,0
+zero_ram_bc			;Zero up to $FFFF bytes
+	xor	a
+fill_ram
+	inc	b		;This is done so zero is checked after decrement
+	inc	c		;00..FF -> 01..00 remapping
+fr_lp	dec	c
+	jr	z,low_carry	;==0, if original number would go negative
+lc_rtn	ld	(hli),a
+	jr	fr_lp
+low_carry
+	dec	b		;==0, if original number would go negative
+	jr	nz,lc_rtn
+	ret
+
+
+;**************************
+;*** Interrupt handling ***
+;**************************
+
+
+
+;When an interrupt is being serviced, all other interrupts are held off
+;until reti or ei
+
+;Handle Vertical Blank Interrupt
+
+vblank
+	push    af
+	push    bc
+	push    de
+	push    hl
+
+	call	gamevb
+		       		;init scrolls for next frame
+	ld	a,(screeny)
+	ld	(scy),a
+
+	call    dma_to_OAM	;DMA transfer object buffer to OAM
+				;This routine is in internal RAM
+	ld	a,audbank
+	call	newbank
+	call	audcode
+	call	oldbank
+	ld      a,1		;Flag set for v-blank end
+	ld      (vbflag),a
+
+	ld	hl,vbcount
+	inc	(hl)
+
+vbout
+	pop     hl
+	pop     de
+	pop     bc
+	pop     af
+	reti			;Re-enables interrupts
+
+
+forcebank1
+	ld	a,1
+forcebank	;sets bank with no save of current bank
+		;enters with bank in a
+	ld	(MBC_REG1),a
+	ld	(MBCshad1),a	;Shadow write
+	ret
+
+newbank		;save bank and set new one
+
+	push	af
+	ld	a,(MBCshad1)
+	ld	(banksave),a
+	pop	af
+	jr	forcebank
+
+oldbank		;restore saved bank
+	ld	a,(banksave)
+	jr	forcebank
+
+lcd_off
+	ld	a,(LY)		;See if LCD is already off
+	ld	b,a
+	ld	c,0
+llp2	ld	a,(LY)
+	cp	b
+	jr	nz,lison
+	inc	c
+	ret	z		;If c wraps, return - lcd is already off
+	jr	llp2
+
+lison	ld	a,(IE)		;Interrupt acknowlege (Enable) flags
+	push	af
+	res	0,a		;Prohibit v-blank interrupt
+	ld	(IE),a
+lcd_lp	ld	a,(LY)		;Wait v-blank
+	cp	145		;Check for Line 145
+	jr	nz,lcd_lp
+	ld	a,(LCDC)	;Stop lcdc
+	and	%01111111	;Stop Controller
+	ld	(LCDC),a
+	pop	af
+	ld	(IE),a
+	ret
+
+
+lcd_on	ld      a,(IE)		;Interrupt acknowlege (Enable) flags
+	push	af		;Save interrupts for restoring below
+	xor	a		;Turn off all interrupts
+	ld      (IE),a
+
+	ld      a,(LCDC)
+	or	%10000000	;Turn on controller
+	ld      (LCDC),a	;Restore entry obj and bg state
+
+	pop	af
+	ld      (IE),a		;Restore interrupts
+	ret
+
+
+getfont1
+	ld	de,$9000
+	ld	bc,$800
+	call	block_move
+	ld	de,$8800
+	ld	bc,$800
+	call	block_move
+	ret
+
+blk_move
+movehldebc		; (hl) -> (de), count = (bc)
+block_move
+l0
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec	bc	
+	ld	a,b
+	or	c
+	jr	nz,l0
+	ret
+
+
+movehldec		; (hl) -> (de), count = (c)
+
+l0
+	ld	a,(hli)
+	ld	(de),a
+	inc	de
+	dec	c
+	jr	nz,l0
+	ret
+
+zerohlc			; 0 -> (hl), count = (c)
+	xor	a
+l0
+	ld	(hli),a
+	dec	c
+	jr	nz,l0
+	ret
+
+tablejump		;hl = table, a = index	(hl+(a*2)) -> (pc)
+	sla	a
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,0
+	ld	h,a
+	ld	a,(hli)
+	ld	h,(hl)
+	ld	l,a
+	jp	(hl)
+
+getpal			;hl = start of palette
+	
+	ld	de,$ff68	;palette address register
+	ld	a,$80
+	ld	(de),a		;start at palette 0, auto increment
+
+	ld	de,$ff69	;palette data register
+	ld	b,$40		;64 bytes of data
+l0
+	ld	a,(hli)
+	ld	(de),a
+	dec	b
+	jr	nz,l0
+      	ret
+
+indexbya		; hl + a -> hl
+	add	a,l
+	ld	l,a
+	jr	nc,hregok
+	inc	h
+hregok
+	ret
+
+dosong
+	ld	b,a	;sound #
+	ld	a,(musicflag)
+	and	a
+	ret	nz
+	ld	a,audbank
+	call	forcebank
+	call	startsong
+	ld	a,1
+	call	forcebank
+	ret
+
+forcesong		    		;for sounds that are really songs
+	ld	b,a	;sound #
+	ld	a,(soundflag)
+	and	a
+	ret	nz
+	ld	a,audbank
+	call	forcebank
+	call	startsong
+	ld	a,1
+	call	forcebank
+	ret
+
+
+
+dosound
+	ld	b,a	;sound #
+	ld	a,(soundflag)
+	and	a
+	ret	nz
+	ld	a,audbank
+	call	newbank		;forcebank
+	call	startsound
+	ld	a,1
+	call	forcebank
+	ret
+
+dopauseaud
+	ld	a,audbank
+	call	forcebank
+	call	pauseaud
+	ld	a,1
+	call	forcebank
+
+;	ld	hl,NR51
+;	ld	a,(hl)
+;	ld	(saveaud),a
+;	xor	a
+;	ld	(hl),a
+	
+	ret
+
+doresume
+	ld	a,audbank
+	call	forcebank
+	call	resumeaud
+	ld	a,1
+	call	forcebank
+;	ld	a,(NR51)
+;	and	a
+;	jr	nz,dores1
+;	ld	a,(saveaud)
+;	ld	(NR51),a
+dores1
+	ret
+
+
+
+moveahlc		; a -> (hl) c times
+l0
+	ld	(hli),a
+	dec	c
+	jr	nz,l0
+	ret
+

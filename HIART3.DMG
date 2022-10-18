@@ -1,0 +1,44 @@
+
+	thisbank	$21
+	org	$4000
+wrld0bank	equ	$21
+wrld0pal		includeraw	grfx\wrld0pal.raw
+wrld0map		includeraw	grfx\wrld0map.raw
+		includeraw	grfx\wrld0atr.raw
+		includeraw	grfx\wrld0til.raw
+
+	thisbank	$22
+	org	$4000
+wrld1bank	equ	$22
+wrld1pal		includeraw	grfx\wrld1pal.raw
+wrld1map		includeraw	grfx\wrld1map.raw
+		includeraw	grfx\wrld1atr.raw
+		includeraw	grfx\wrld1til.raw
+
+
+	thisbank	$23
+	org	$4000
+wrld2bank	equ	$23
+wrld2pal		includeraw	grfx\wrld2pal.raw
+wrld2map		includeraw	grfx\wrld2map.raw
+		includeraw	grfx\wrld2atr.raw
+		includeraw	grfx\wrld2til.raw
+
+	thisbank	$24
+	org	$4000
+wrld3bank	equ	$24
+wrld3pal		includeraw	grfx\wrld3pal.raw
+wrld3map		includeraw	grfx\wrld3map.raw
+		includeraw	grfx\wrld3atr.raw
+		includeraw	grfx\wrld3til.raw
+
+	thisbank	$25
+	org	$4000
+wrld4bank	equ	$25
+wrld4pal		includeraw	grfx\wrld4pal.raw
+wrld4map		includeraw	grfx\wrld4map.raw
+		includeraw	grfx\wrld4atr.raw
+		includeraw	grfx\wrld4til.raw
+
+	dumpsym	hiart3
+

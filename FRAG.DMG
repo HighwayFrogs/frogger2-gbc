@@ -1,0 +1,44 @@
+dojump
+	dec	a	;decrement jump count
+	ld	(jumpcount),a
+	jr	nz,morejmp	;not done
+	ld	a,(frogframe)
+	and	$fc		;static frames are 0,4,8,c
+	ld	(frogframe),a
+	ld	a,(lowy) ;always set at 8 less than current farthest lane
+	ld	b,a
+	ld	a,(frogy)
+	dec	a		;frogy has one more dec coming
+	cp	b
+	jr	nz,morejmp1
+	sub	8		;got there, get 10 points and set new value
+	ld	(lowy),a
+	call	addten
+	jr	morejmp1
+morejmp
+	cp	6
+	jr	z,bumpframe
+	cp	2
+	jr	nz,morejmp1
+bumpframe
+	ld	a,(frogframe)
+	inc	a
+	ld	(frogframe),a
+morejmp1
+	ld	a,(frogx)
+	ld	b,a
+	ld	a,(jumpx)
+	add	a,b
+	ld	(frogx),a
+	ld	b,a		;save (kludgy way to do it)
+	ld	a,(jumpcount)
+	cp	4
+	jr	c,mj1	;less than 4
+   	
+	ld	a,(jumpx)	;bigger jump during first half of jump
+	add	a,b
+	ld	(frogx),a
+
+
+mj1
+

@@ -1,0 +1,42 @@
+colorcycle
+	ld	a,(world)
+	cp	mineworld
+	call	z,flashrails
+;	ret
+	ld	a,(frame)
+	and	1
+	jr	nz,nogemc
+	
+	ld	a,$a2
+	ld	($ff6a),a
+	ld	a,(frame)
+	ld	($ff6b),a
+	xor	$ff
+	ld	($ff6b),a
+nogemc
+	ret
+	ld	a,(world)
+	cp	ROCKWORLD
+	ret	nz
+	ld	a,(frame)
+	srl	a
+	srl	a
+	and	6
+	ld	hl,w2colors
+	call	indexbya
+	ld	a,$80+$20
+	ld	($ff68),a
+	ld	c,8
+l0
+	ld	a,(hli)
+	ld	($ff69),a
+	dec	c
+	jr	nz,l0
+	ret
+
+w2colors
+	db	$d3,00,$fd,$00,$5f,$2a,$fd,$1b
+	db	$d3,00,$fd,$00,$5f,$2a,$fd,$1b
+
+
+
