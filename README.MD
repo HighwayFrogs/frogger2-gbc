@@ -1,5 +1,6 @@
 # Frogger 2 (Game Boy / Game Boy Color)
 The official source code to Frogger 2 for Game Boy and Game Boy Color.  
+This code builds a perfect match to the retail build [Frogger 2 (USA) (Rev 1)](https://gamehacking.org/game/128029).  
 **Developer:** Morning Star Media  
 **Programmer:** David Lubar  
 
@@ -15,7 +16,6 @@ Command: `X:`
 
 **3)** Assemble the ROM by running `MAKE.BAT`.  
 The ROM will be called `frogger2.bin`.  
-The output ROM is a byte for byte match of the retail game (`BUILDS\frog2.com`).
 
 Preserved by [Highway Frogs](https://highwayfrogs.net/)
 
