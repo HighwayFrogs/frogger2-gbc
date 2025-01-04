@@ -47,7 +47,7 @@ move
 	jr	nz,move
 	ret
 
-bwmessage	includeraw	bw.pmf
+bwmessage	includeraw	grfx\bw.pmf
 
 	thisbank	$3d
 	org	$4000

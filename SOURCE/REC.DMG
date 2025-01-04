@@ -2,7 +2,7 @@
 	org	$4000
 recordsbank	equ	$3b
 
-recordspmf	includeraw	records.pmf
+recordspmf	includeraw	grfx\records.pmf
 icons		includeraw	grfx\stats.raw
 iconspal	includeraw	grfx\stats.pal
 rsprites

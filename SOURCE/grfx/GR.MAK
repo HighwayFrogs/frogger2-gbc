@@ -1,7 +1,6 @@
 bw.grp:	bw.lbm
 	l2grp /sns /h /v /t bw
 	g2c <bw.txt
-	copy bw.pmf ..
 
 cset.raw:	cset.bin
 	copy /b rawhead+cset.bin cset.raw
@@ -289,7 +288,6 @@ lstat.pal:	lstat.bin
 records.grp:	records.lbm
 	l2grp /sns /h /v /t records
 	g2c <records.txt
-	copy records.pmf ..
 
 titlepal.raw:	title.pal
 	copy /b rawhead+title.pal titlepal.raw
